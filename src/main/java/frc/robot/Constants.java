@@ -7,17 +7,22 @@ package frc.robot;
 import com.studica.frc.AHRS.NavXComType;
 
 /**
- * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
- * constants. This class should not be used for any other purpose. All constants should be declared
+ * The Constants class provides a convenient place for teams to hold robot-wide
+ * numerical or boolean
+ * constants. This class should not be used for any other purpose. All constants
+ * should be declared
  * globally (i.e. public static). Do not put anything functional in this class.
  *
- * <p>It is advised to statically import this class (or one of its inner classes) wherever the
+ * <p>
+ * It is advised to statically import this class (or one of its inner classes)
+ * wherever the
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+
   public static class DriveTrainConstants {
     public static final int kLeftFrontMotorCanID = 1;
     public static final int kLeftBackMotorCanID = 2;
@@ -33,5 +38,19 @@ public final class Constants {
     public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;
   }
 
+  public static class FuelShooterConstants {
+    public static final boolean k_isEnabled = true;
+    public static final int kShooterMotorID = 1;
+    public static final double kShooterGearRatio = 0.5;
+    public static final double kShooterMotorVoltageCompens = 10;
+    public static final int kShooterMotorCurrentLimit = 60;
+  }
 
+  public static class FuelIntakeConstants {
+    public static final boolean k_isEnabled = true;
+    public static final int kIntakeMotorID = 2;
+    public static final double kIntakeGearRatio = 0.5;
+    public static final double kIntakeMotorVoltageCompens = 10;
+    public static final int kIntakeMotorCurrentLimit = 60;
+  }
 }
