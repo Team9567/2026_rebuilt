@@ -42,7 +42,7 @@ public final class Constants {
     public static final int kRightFrontMotorCanID = 2;
     public static final int kRightBackMotorCanID = 4;
     public static final double kWheelDiameter = 6;
-    public static final double kWheelCircumference = kWheelDiameter*Math.PI;
+    public static final double kWheelCircumference = kWheelDiameter * Math.PI;
     public static final double kGearRatio = 8.46;
     public static final double kMotorRampTime = 0.1;
     public static final double kWheelDiameterInches = 6.17;
@@ -70,6 +70,12 @@ public final class Constants {
     public static final double kIntakeGearRatio = 0.5;
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
+
+    public static final double kShooterFeedForwardStatic = 0;
+    public static final double kShooterFeedForwardVelocity = 0;
+    public static final double kShooterP = 0;
+    public static final double kShooterI = 0;
+    public static final double kShooterD = 0;
 
     public static final double kIntakeIntakeMotorSpeed = 0;
     public static final double kIntakeShooterMotorSpeed = 0;

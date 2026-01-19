@@ -6,6 +6,8 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -17,6 +19,10 @@ import frc.robot.Constants.FuelConstants;
 public class FuelSubsystem extends SubsystemBase {
   private SparkMax fuelShooterMotor;
   private SparkMax fuelIntakeMotor;
+  SimpleMotorFeedforward shooterFeedforward = new SimpleMotorFeedforward(FuelConstants.kShooterFeedForwardStatic,
+      FuelConstants.kShooterFeedForwardVelocity);
+  PIDController shooterController = new PIDController(FuelConstants.kShooterP, FuelConstants.kShooterI,
+      FuelConstants.kShooterD);
 
   public FuelSubsystem() {
     if (FuelConstants.k_isEnabled) {
@@ -25,10 +31,12 @@ public class FuelSubsystem extends SubsystemBase {
       // Set up the Intake motor as a brushless motor
       fuelIntakeMotor = new SparkMax(FuelConstants.kIntakeMotorID, MotorType.kBrushless);
 
-      // Create and apply configuration for shooter motor. Voltage compensation helps
-      // the shooter behave the same as the battery
-      // voltage dips. The current limit helps prevent breaker trips or burning out
-      // the motor in the event the shooter stalls.
+      /**
+       * Create and apply configuration for shooter motor. Voltage compensation helps
+       * the shooter behave the same as the battery
+       * voltage dips. The current limit helps prevent breaker trips or burning out
+       * the motor in the event the shooter stalls.
+       */
       SparkMaxConfig shooterConfig = new SparkMaxConfig();
       shooterConfig
           .idleMode(IdleMode.kBrake)
@@ -44,10 +52,12 @@ public class FuelSubsystem extends SubsystemBase {
 
       fuelShooterMotor.setCANTimeout(250);
 
-      // Create and apply configuration for intake motor. Voltage compensation helps
-      // the intake behave the same as the battery
-      // voltage dips. The current limit helps prevent breaker trips or burning out
-      // the motor in the event the intake stalls.
+      /**
+       * Create and apply configuration for intake motor. Voltage compensation helps
+       * the intake behave the same as the battery
+       * voltage dips. The current limit helps prevent breaker trips or burning out
+       * the motor in the event the intake stalls.
+       */
       SparkMaxConfig intakeConfig = new SparkMaxConfig();
       intakeConfig
           .idleMode(IdleMode.kBrake)
@@ -125,12 +135,34 @@ public class FuelSubsystem extends SubsystemBase {
     }
   }
 
-  /** The following code is what sets our four stages for our robot: Intake, Eject, Spinup, and Shoot.
-  * Intake is how the robot sucks up Fuel.
-  * Eject is how the robot releases Fuel without Shooting it.
-  * Spinup is the stage before Shoot, where the ShooterMotor reaches full power before Shoot.
-  * Shoot is how the robot will launch Fuel.
-  */
+  public Command setVelocity(double RPS) {
+    if (FuelConstants.k_isEnabled) {
+      return Commands.run(
+          () -> {
+            double forward = shooterFeedforward.calculate(RPS);
+            double pidV = shooterController.calculate(fuelShooterMotor.getEncoder().getVelocity(), RPS);
+            double velocity = fuelShooterMotor.getEncoder().getVelocity();
+            SmartDashboard.putNumber("shooter/ff", forward);
+            SmartDashboard.putNumber("shooter/pid", pidV);
+            SmartDashboard.putNumber("shooter/RPS", RPS);
+            SmartDashboard.putNumber("shooter/ticks", fuelShooterMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("shooter/velocity", velocity);
+            setVoltage(forward + pidV, 0);
+          }, this);
+    } else {
+      return Commands.none();
+    }
+  }
+
+  /**
+   * The following code is what sets our four actions for our robot:
+   * Intake, Eject, Spinup, and Shoot.
+   * Intake is how the robot sucks up Fuel.
+   * Eject is how the robot releases Fuel without Shooting it.
+   * Spinup is the action before Shoot, where the ShooterMotor reaches full power
+   * before Shoot.
+   * Shoot is how the robot will launch Fuel.
+   */
   public Command intakeCommand() {
     if (FuelConstants.k_isEnabled) {
       return setCommand(FuelConstants.kIntakeShooterMotorSpeed, FuelConstants.kIntakeIntakeMotorSpeed);
