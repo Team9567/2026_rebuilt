@@ -26,6 +26,7 @@ public class FuelSubsystem extends SubsystemBase {
       // Set up the Intake motor as a brushless motor
       fuelIntakeMotor = new SparkMax(FuelConstants.kIntakeMotorID, MotorType.kBrushless);
 
+      
       // Create and apply configuration for shooter motor. Voltage compensation helps
       // the shooter behave the same as the battery
       // voltage dips. The current limit helps prevent breaker trips or burning out
@@ -63,6 +64,9 @@ public class FuelSubsystem extends SubsystemBase {
       fuelIntakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
       fuelIntakeMotor.setCANTimeout(250);
+
+      // Pass in stop when needed to be stopped.
+      setDefaultCommand(stopCommand());
     }
   }
 
