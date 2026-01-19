@@ -22,11 +22,9 @@ public class FuelSubsystem extends SubsystemBase {
     if (FuelConstants.k_isEnabled) {
       // Set up the shooter motor as a brushless motor
       fuelShooterMotor = new SparkMax(FuelConstants.kShooterMotorID, MotorType.kBrushless);
-
       // Set up the Intake motor as a brushless motor
       fuelIntakeMotor = new SparkMax(FuelConstants.kIntakeMotorID, MotorType.kBrushless);
 
-      
       // Create and apply configuration for shooter motor. Voltage compensation helps
       // the shooter behave the same as the battery
       // voltage dips. The current limit helps prevent breaker trips or burning out
@@ -70,6 +68,7 @@ public class FuelSubsystem extends SubsystemBase {
     }
   }
 
+  // The following code is what will set our speed, voltage, and our stop control.
   public void set(double shooterSpeed, double intakeSpeed) {
     fuelShooterMotor.set(shooterSpeed);
 
@@ -126,4 +125,41 @@ public class FuelSubsystem extends SubsystemBase {
     }
   }
 
+  /** The following code is what sets our four stages for our robot: Intake, Eject, Spinup, and Shoot.
+  * Intake is how the robot sucks up Fuel.
+  * Eject is how the robot releases Fuel without Shooting it.
+  * Spinup is the stage before Shoot, where the ShooterMotor reaches full power before Shoot.
+  * Shoot is how the robot will launch Fuel.
+  */
+  public Command intakeCommand() {
+    if (FuelConstants.k_isEnabled) {
+      return setCommand(FuelConstants.kIntakeShooterMotorSpeed, FuelConstants.kIntakeIntakeMotorSpeed);
+    } else {
+      return Commands.none();
+    }
+  }
+
+  public Command ejectCommand() {
+    if (FuelConstants.k_isEnabled) {
+      return setCommand(FuelConstants.kEjectShooterMotorSpeed, FuelConstants.kEjectIntakeMotorSpeed);
+    } else {
+      return Commands.none();
+    }
+  }
+
+  public Command spinupCommand() {
+    if (FuelConstants.k_isEnabled) {
+      return setCommand(FuelConstants.kSpinupShooterMotorSpeed, FuelConstants.kSpinupIntakeMotorSpeed);
+    } else {
+      return Commands.none();
+    }
+  }
+
+  public Command shootCommand() {
+    if (FuelConstants.k_isEnabled) {
+      return setCommand(FuelConstants.kShootShooterMotorSpeed, FuelConstants.kShootIntakeMotorSpeed);
+    } else {
+      return Commands.none();
+    }
+  }
 }

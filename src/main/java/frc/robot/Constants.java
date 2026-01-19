@@ -65,10 +65,20 @@ public final class Constants {
     public static final double kShooterGearRatio = 0.5;
     public static final double kShooterMotorVoltageCompens = 10;
     public static final int kShooterMotorCurrentLimit = 60;
+
     public static final int kIntakeMotorID = 6;
     public static final double kIntakeGearRatio = 0.5;
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
+
+    public static final double kIntakeIntakeMotorSpeed = 0;
+    public static final double kIntakeShooterMotorSpeed = 0;
+    public static final double kEjectIntakeMotorSpeed = 0;
+    public static final double kEjectShooterMotorSpeed = 0;
+    public static final double kSpinupIntakeMotorSpeed = 0;
+    public static final double kSpinupShooterMotorSpeed = 0;
+    public static final double kShootIntakeMotorSpeed = 0;
+    public static final double kShootShooterMotorSpeed = 0;
   }
 }
 
