@@ -59,17 +59,13 @@ public final class Constants {
     public static final double kTurnD = 0.005 ;
   }
 
-  public static class FuelShooterConstants {
+  public static class FuelConstants {
     public static final boolean k_isEnabled = true;
-    public static final int kShooterMotorID = 1;
+    public static final int kShooterMotorID = 5;
     public static final double kShooterGearRatio = 0.5;
     public static final double kShooterMotorVoltageCompens = 10;
     public static final int kShooterMotorCurrentLimit = 60;
-  }
-
-  public static class FuelIntakeConstants {
-    public static final boolean k_isEnabled = true;
-    public static final int kIntakeMotorID = 2;
+    public static final int kIntakeMotorID = 6;
     public static final double kIntakeGearRatio = 0.5;
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
