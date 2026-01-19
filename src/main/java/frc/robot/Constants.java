@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.studica.frc.AHRS.NavXComType;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -16,4 +18,20 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
   }
+  public static class DriveTrainConstants {
+    public static final int kLeftFrontMotorCanID = 1;
+    public static final int kLeftBackMotorCanID = 2;
+    public static final int kRightFrontMotorCanID = 3;
+    public static final int kRightBackMotorCanID = 4;
+    public static final double kWheelDiameter = 6;
+    public static final double kWheelCircumference = kWheelDiameter*Math.PI;
+    public static final double kGearRatio = 8.46;
+    public static final double kMotorRampTime = 0.1;
+    public static final double kWheelDiameterInches = 6.17;
+    public static final double kPositionConversionFactor = (kWheelDiameterInches * Math.PI) / kGearRatio;
+
+    public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;
+  }
+
+
 }
