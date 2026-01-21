@@ -98,19 +98,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
         });
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a
-   * digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  public void setGearTrigger(Trigger t) {
+    lowGearTrigger = Optional.of(t);
+    // Sets t to a trigger and sending it to RobotContainer
   }
 
-  public void arcadeDrive(double aSpeed, double aRotation) {
-    drivetrain.arcadeDrive(aSpeed, aRotation);
+  public void arcadeDrive(double speed, double turn) {
+    if (lowGearTrigger.isPresent()) {
+      if (lowGearTrigger.get().getAsBoolean()) {
+        speed /= 4;
+        turn /= 4;
+      }
+    }
+    drivetrain.arcadeDrive(speed, turn);
+    // The mathematics for the high/low gear and ArcadeDrive
   }
 
   public double getLeftEncoder() {

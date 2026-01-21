@@ -17,6 +17,16 @@ import com.studica.frc.AHRS.NavXComType;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kDriverControllerA = 1;
+    public static final int kDriverControllerB = 2;
+    public static final int kDriverControllerX = 3;
+    public static final int kDriverControllerY = 4;
+    public static final int kControllerLeftVertical = 1;
+    public static final int kControllerLeftHorizontal = 0;
+    public static final int kDriverControllerPOVLeft = 270;
+    public static final int kDriverControllerPOVRight = 90;
+    public static final int kDriverControllerPOVUp = 0;
+    public static final int kDriverControllerPOVDown = 180;
   }
   public static class DriveTrainConstants {
     public static final int kLeftFrontMotorCanID = 1;
