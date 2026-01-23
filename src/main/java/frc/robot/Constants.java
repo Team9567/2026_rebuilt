@@ -23,6 +23,8 @@ public final class Constants {
     public static final int kDriverControllerY = 4;
     public static final int kControllerLeftVertical = 1;
     public static final int kControllerLeftHorizontal = 0;
+    public static final int kControllerRightVertical = 5;
+    public static final int kControllerRightHorizontal = 4;
     public static final int kDriverControllerPOVLeft = 270;
     public static final int kDriverControllerPOVRight = 90;
     public static final int kDriverControllerPOVUp = 0;
@@ -30,8 +32,8 @@ public final class Constants {
   }
   public static class DriveTrainConstants {
     public static final int kLeftFrontMotorCanID = 1;
-    public static final int kLeftBackMotorCanID = 2;
-    public static final int kRightFrontMotorCanID = 3;
+    public static final int kLeftBackMotorCanID = 3;
+    public static final int kRightFrontMotorCanID = 2;
     public static final int kRightBackMotorCanID = 4;
     public static final double kWheelDiameter = 6;
     public static final double kWheelCircumference = kWheelDiameter*Math.PI;
