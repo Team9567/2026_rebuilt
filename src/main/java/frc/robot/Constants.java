@@ -40,6 +40,8 @@ public final class Constants {
     public static final double kGearRatio = 8.46;
     public static final double kMotorRampTime = 0.1;
     public static final double kWheelDiameterInches = 6.17;
+    public static final double kTrackWidth = 0.546; // 21.5 inches in meters, measured midpoint center wheel to midpoint center wheel
+
     public static final double kPositionConversionFactor = (kWheelDiameterInches * Math.PI) / kGearRatio;
 
     public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;

@@ -20,6 +20,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,8 +37,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
   SparkFlex rightFrontMotor = new SparkFlex(DriveTrainConstants.kRightFrontMotorCanID, MotorType.kBrushless);
   SparkFlex rightBackMotor = new SparkFlex(DriveTrainConstants.kRightBackMotorCanID, MotorType.kBrushless);
   DifferentialDrive drivetrain;
+  DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Meters.of(DriveTrainConstants.kTrackWidth));
   DifferentialDrivePoseEstimator odometry;
-  private AHRS m_gyro;
+  AHRS m_gyro;
   Field2d field = new Field2d();
 
   Optional<Trigger> lowGearTrigger;
@@ -47,9 +50,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
         .in(Meters);
     SmartDashboard.putNumber("drivetrain/wheelconversion", wheelConversion);
 
-    try (AHRS m_gyro = new AHRS(DriveTrainConstants.kGyroPort)) {
-      m_gyro.reset();
-    }
+    m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
+    m_gyro.reset();
+    odometry = new DifferentialDrivePoseEstimator(
+        kinematics,
+        m_gyro.getRotation2d(),
+        getLeftEncoder(),
+        getRightEncoder(),
+        new Pose2d(0, 0, new Rotation2d()));
 
     for (SparkFlex motor : new SparkFlex[] {
         leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor }) {
@@ -105,10 +113,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void arcadeDrive(double speed, double turn) {
     if (lowGearTrigger.isPresent()) {
-       if (lowGearTrigger.get().getAsBoolean()) {
-         speed /= 4;
-         turn /= 4;
-       }
+      if (lowGearTrigger.get().getAsBoolean()) {
+        speed /= 4;
+        turn /= 4;
+      }
     }
     drivetrain.arcadeDrive(speed, turn);
     // The mathematics for the high/low gear and ArcadeDrive
