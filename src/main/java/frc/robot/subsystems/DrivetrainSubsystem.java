@@ -105,13 +105,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public void arcadeDrive(double speed, double turn) {
     if (lowGearTrigger.isPresent()) {
-      if (lowGearTrigger.get().getAsBoolean()) {
-        speed /= 4;
-        turn /= 4;
-      }
+       if (lowGearTrigger.get().getAsBoolean()) {
+         speed /= 4;
+         turn /= 4;
+       }
     }
     drivetrain.arcadeDrive(speed, turn);
     // The mathematics for the high/low gear and ArcadeDrive
+  }
+
+  // Same as arcadeDrive, but applies no speed adjustments (low gear)
+  public void arcadeDriveRaw(double speed, double turn) {
+    drivetrain.arcadeDrive(speed, turn);
   }
 
   public double getLeftEncoder() {
