@@ -54,13 +54,15 @@ public class RobotContainer {
   private void configureBindings() {
     m_drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> {
       m_drivetrainSubsystem.arcadeDrive(-m_driverController.getRawAxis(OperatorConstants.kControllerLeftVertical),
-          m_driverController.getRawAxis(-OperatorConstants.kControllerRightHorizontal));
+          -m_driverController.getRawAxis(OperatorConstants.kControllerRightHorizontal));
     }, m_drivetrainSubsystem));
 
     Trigger lowGear = m_driverController.button(OperatorConstants.kDriverControllerY);
     m_drivetrainSubsystem.setGearTrigger(lowGear);
     // Passes the trigger from RobotContainer to TabiSubsystem, binds the function
     // to Y
+    m_driverController.button(OperatorConstants.kDriverControllerA).onTrue(m_drivetrainSubsystem.driveCommand(2));
+    m_driverController.button(OperatorConstants.kDriverControllerB).onTrue(m_drivetrainSubsystem.turnCommand(90));
   }
 
   /**

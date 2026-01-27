@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.studica.frc.AHRS.NavXComType;
+import edu.wpi.first.units.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -42,10 +43,17 @@ public final class Constants {
     public static final double kWheelDiameterInches = 6.17;
     public static final double kTrackWidth = 0.546; // 21.5 inches in meters, measured midpoint center wheel to midpoint center wheel
 
-    public static final double kPositionConversionFactor = (kWheelDiameterInches * Math.PI) / kGearRatio;
+    public static final double kPositionConversionFactor = Units.Inches.of(kWheelCircumference / kGearRatio).in(Units.Meters);
 
     public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;
+    public static final double kDriveP = 6.0 ;
+    public static final double kDriveI = 0 ;
+    public static final double kDriveD = 0 ;
+    public static final double kTurnP = 0.125 ;
+    public static final double kTurnI = 0 ;
+    public static final double kTurnD = 0.005 ;
   }
 
 
 }
+

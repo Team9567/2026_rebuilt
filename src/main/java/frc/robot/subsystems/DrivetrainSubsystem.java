@@ -18,6 +18,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -42,14 +44,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
   AHRS m_gyro;
   Field2d field = new Field2d();
 
+  double targetMeters = 0;
+  double targetAngle = 0;
+  PIDController drivepid = new PIDController(DriveTrainConstants.kDriveP, DriveTrainConstants.kDriveI,
+      DriveTrainConstants.kDriveD);
+  PIDController turnpid = new PIDController(DriveTrainConstants.kTurnP, DriveTrainConstants.kTurnI,
+      DriveTrainConstants.kTurnD);
+
   Optional<Trigger> lowGearTrigger;
 
   /** Creates a new ExampleSubsystem. */
   public DrivetrainSubsystem() {
-    double wheelConversion = Inches.of(DriveTrainConstants.kWheelCircumference * DriveTrainConstants.kGearRatio)
-        .in(Meters);
-    SmartDashboard.putNumber("drivetrain/wheelconversion", wheelConversion);
-
+    turnpid.setTolerance(1);
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
     odometry = new DifferentialDrivePoseEstimator(
@@ -58,6 +64,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
         getLeftEncoder(),
         getRightEncoder(),
         new Pose2d(0, 0, new Rotation2d()));
+
+    SmartDashboard.putNumber("drivetrain/wheelconversion", DriveTrainConstants.kPositionConversionFactor);
 
     for (SparkFlex motor : new SparkFlex[] {
         leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor }) {
@@ -90,20 +98,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     rightFrontMotor.configure(rightfrontConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     drivetrain = new DifferentialDrive(leftFrontMotor, rightFrontMotor);
-  }
-
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
   }
 
   public void setGearTrigger(Trigger t) {
@@ -158,4 +152,42 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
+
+  public Command driveCommand(double distance) {
+    return startRun(() -> {
+      double avgPos = getAverageTicks();
+      targetMeters = avgPos + distance;
+
+      drivepid.reset();
+      SmartDashboard.putNumber("drivetrain/pid/targetDistance", targetMeters);
+
+    }, () -> {
+      double avgPos = getAverageTicks();
+      double speed = drivepid.calculate(avgPos, targetMeters);
+      speed = MathUtil.clamp(speed, -0.25, 0.25);
+      arcadeDrive(speed, 0);
+      SmartDashboard.putNumber("drivetrain/pid/position", avgPos);
+    }).until(() -> {
+      return drivepid.atSetpoint();
+    });
+  }
+
+  public Command turnCommand(double angle) {
+    return startRun(() -> {
+      double curAngle = m_gyro.getAngle();
+      targetAngle = curAngle + angle;
+
+      turnpid.reset();
+      SmartDashboard.putNumber("drivetrain/pid/targetAngle", targetAngle);
+    }, () -> {
+      double rotation = -turnpid.calculate(m_gyro.getAngle(), angle);
+      rotation = MathUtil.clamp(rotation, -0.25, 0.25);
+      SmartDashboard.putNumber("drivetrain/pid/orientation", m_gyro.getAngle());
+      SmartDashboard.putNumber("drivetrain/pid/rotation", rotation);
+      arcadeDrive(0, rotation);
+    }).until(() -> {
+      return turnpid.atSetpoint();
+    });
+  }
+
 }
