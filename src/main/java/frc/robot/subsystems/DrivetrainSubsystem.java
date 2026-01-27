@@ -165,7 +165,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       double avgPos = getAverageTicks();
       double speed = drivepid.calculate(avgPos, targetMeters);
       speed = MathUtil.clamp(speed, -0.25, 0.25);
-      arcadeDrive(speed, 0);
+      arcadeDriveRaw(speed, 0);
       SmartDashboard.putNumber("drivetrain/pid/position", avgPos);
     }).until(() -> {
       return drivepid.atSetpoint();
@@ -184,7 +184,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       rotation = MathUtil.clamp(rotation, -0.25, 0.25);
       SmartDashboard.putNumber("drivetrain/pid/orientation", m_gyro.getAngle());
       SmartDashboard.putNumber("drivetrain/pid/rotation", rotation);
-      arcadeDrive(0, rotation);
+      arcadeDriveRaw(0, rotation);
     }).until(() -> {
       return turnpid.atSetpoint();
     });
