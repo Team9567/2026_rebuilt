@@ -1,13 +1,15 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+// import edu.wpi.first.math.controller.PIDController;
+// import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -19,10 +21,10 @@ import frc.robot.Constants.FuelConstants;
 public class FuelSubsystem extends SubsystemBase {
   private SparkMax fuelShooterMotor;
   private SparkMax fuelIntakeMotor;
-  SimpleMotorFeedforward shooterFeedforward = new SimpleMotorFeedforward(FuelConstants.kShooterFeedForwardStatic,
-      FuelConstants.kShooterFeedForwardVelocity);
-  PIDController shooterController = new PIDController(FuelConstants.kShooterP, FuelConstants.kShooterI,
-      FuelConstants.kShooterD);
+  // SimpleMotorFeedforward shooterFeedforward = new SimpleMotorFeedforward(FuelConstants.kShooterFeedForwardStatic,
+  //     FuelConstants.kShooterFeedForwardVelocity);
+  // PIDController shooterController = new PIDController(FuelConstants.kShooterP, FuelConstants.kShooterI,
+  //     FuelConstants.kShooterD);
 
   public FuelSubsystem() {
     if (FuelConstants.k_isEnabled) {
@@ -48,6 +50,21 @@ public class FuelSubsystem extends SubsystemBase {
           .reverseSoftLimitEnabled(false);
       shooterConfig.encoder.positionConversionFactor(FuelConstants.kShooterGearRatio);
       shooterConfig.encoder.velocityConversionFactor(1.0 / 60.0);
+    
+      shooterConfig.closedLoop
+        .p(FuelConstants.kShooterP)
+        .i(FuelConstants.kShooterI)
+        .d(FuelConstants.kShooterD)
+        
+        .maxMotion
+          .cruiseVelocity(0)
+          .maxAcceleration(FuelConstants.kMaxAcceleration)
+          .allowedProfileError(FuelConstants.kProfileErrorRPS);
+
+        shooterConfig.closedLoop.feedForward
+          .kS(FuelConstants.kShooterFeedForwardStatic)
+          .kV(FuelConstants.kShooterFeedForwardVelocity)
+          .kA(FuelConstants.kShooterFeedForwardAccel);
       fuelShooterMotor.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
       fuelShooterMotor.setCANTimeout(250);
@@ -139,15 +156,8 @@ public class FuelSubsystem extends SubsystemBase {
     if (FuelConstants.k_isEnabled) {
       return Commands.run(
           () -> {
-            double forward = shooterFeedforward.calculate(RPS);
-            double pidV = shooterController.calculate(fuelShooterMotor.getEncoder().getVelocity(), RPS);
-            double velocity = fuelShooterMotor.getEncoder().getVelocity();
-            SmartDashboard.putNumber("shooter/ff", forward);
-            SmartDashboard.putNumber("shooter/pid", pidV);
-            SmartDashboard.putNumber("shooter/RPS", RPS);
-            SmartDashboard.putNumber("shooter/ticks", fuelShooterMotor.getEncoder().getPosition());
-            SmartDashboard.putNumber("shooter/velocity", velocity);
-            setVoltage(forward + pidV, 0);
+            SparkClosedLoopController controller = fuelShooterMotor.getClosedLoopController();
+            controller.setSetpoint(RPS,ControlType.kMAXMotionVelocityControl);
           }, this);
     } else {
       return Commands.none();
