@@ -18,8 +18,12 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,21 +39,33 @@ public class DrivetrainSubsystem extends SubsystemBase {
   SparkFlex rightFrontMotor = new SparkFlex(DriveTrainConstants.kRightFrontMotorCanID, MotorType.kBrushless);
   SparkFlex rightBackMotor = new SparkFlex(DriveTrainConstants.kRightBackMotorCanID, MotorType.kBrushless);
   DifferentialDrive drivetrain;
+  DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(Meters.of(DriveTrainConstants.kTrackWidth));
   DifferentialDrivePoseEstimator odometry;
-  private AHRS m_gyro;
+  AHRS m_gyro;
   Field2d field = new Field2d();
+
+  double targetMeters = 0;
+  double targetAngle = 0;
+  PIDController drivepid = new PIDController(DriveTrainConstants.kDriveP, DriveTrainConstants.kDriveI,
+      DriveTrainConstants.kDriveD);
+  PIDController turnpid = new PIDController(DriveTrainConstants.kTurnP, DriveTrainConstants.kTurnI,
+      DriveTrainConstants.kTurnD);
 
   Optional<Trigger> lowGearTrigger;
 
   /** Creates a new ExampleSubsystem. */
   public DrivetrainSubsystem() {
-    double wheelConversion = Inches.of(DriveTrainConstants.kWheelCircumference * DriveTrainConstants.kGearRatio)
-        .in(Meters);
-    SmartDashboard.putNumber("drivetrain/wheelconversion", wheelConversion);
+    turnpid.setTolerance(1);
+    m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
+    m_gyro.reset();
+    odometry = new DifferentialDrivePoseEstimator(
+        kinematics,
+        m_gyro.getRotation2d(),
+        getLeftEncoder(),
+        getRightEncoder(),
+        new Pose2d(0, 0, new Rotation2d()));
 
-    try (AHRS m_gyro = new AHRS(DriveTrainConstants.kGyroPort)) {
-      m_gyro.reset();
-    }
+    SmartDashboard.putNumber("drivetrain/wheelconversion", DriveTrainConstants.kPositionConversionFactor);
 
     for (SparkFlex motor : new SparkFlex[] {
         leftFrontMotor, leftBackMotor, rightFrontMotor, rightBackMotor }) {
@@ -84,33 +100,25 @@ public class DrivetrainSubsystem extends SubsystemBase {
     drivetrain = new DifferentialDrive(leftFrontMotor, rightFrontMotor);
   }
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public Command exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+  public void setGearTrigger(Trigger t) {
+    lowGearTrigger = Optional.of(t);
+    // Sets t to a trigger and sending it to RobotContainer
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a
-   * digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  public void arcadeDrive(double speed, double turn) {
+    if (lowGearTrigger.isPresent()) {
+      if (lowGearTrigger.get().getAsBoolean()) {
+        speed /= 4;
+        turn /= 4;
+      }
+    }
+    drivetrain.arcadeDrive(speed, turn);
+    // The mathematics for the high/low gear and ArcadeDrive
   }
 
-  public void arcadeDrive(double aSpeed, double aRotation) {
-    drivetrain.arcadeDrive(aSpeed, aRotation);
+  // Same as arcadeDrive, but applies no speed adjustments (low gear)
+  public void arcadeDriveRaw(double speed, double turn) {
+    drivetrain.arcadeDrive(speed, turn);
   }
 
   public double getLeftEncoder() {
@@ -144,4 +152,42 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
+
+  public Command driveCommand(double distance) {
+    return startRun(() -> {
+      double avgPos = getAverageTicks();
+      targetMeters = avgPos + distance;
+
+      drivepid.reset();
+      SmartDashboard.putNumber("drivetrain/pid/targetDistance", targetMeters);
+
+    }, () -> {
+      double avgPos = getAverageTicks();
+      double speed = drivepid.calculate(avgPos, targetMeters);
+      speed = MathUtil.clamp(speed, -0.25, 0.25);
+      arcadeDriveRaw(speed, 0);
+      SmartDashboard.putNumber("drivetrain/pid/position", avgPos);
+    }).until(() -> {
+      return drivepid.atSetpoint();
+    });
+  }
+
+  public Command turnCommand(double angle) {
+    return startRun(() -> {
+      double curAngle = m_gyro.getAngle();
+      targetAngle = curAngle + angle;
+
+      turnpid.reset();
+      SmartDashboard.putNumber("drivetrain/pid/targetAngle", targetAngle);
+    }, () -> {
+      double rotation = -turnpid.calculate(m_gyro.getAngle(), angle);
+      rotation = MathUtil.clamp(rotation, -0.25, 0.25);
+      SmartDashboard.putNumber("drivetrain/pid/orientation", m_gyro.getAngle());
+      SmartDashboard.putNumber("drivetrain/pid/rotation", rotation);
+      arcadeDriveRaw(0, rotation);
+    }).until(() -> {
+      return turnpid.atSetpoint();
+    });
+  }
+
 }
