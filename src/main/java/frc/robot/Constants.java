@@ -22,14 +22,22 @@ import edu.wpi.first.units.Units;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+
     public static final int kDriverControllerA = 1;
     public static final int kDriverControllerB = 2;
     public static final int kDriverControllerX = 3;
     public static final int kDriverControllerY = 4;
+
+    public static final int kDriverControllerLeftBumper = 5;
+    public static final int kDriverControllerRightBumper = 6;
+    public static final int kDriverControllerLeftTrigger = 2;
+    public static final int kDriverControllerRightTrigger = 3;
+
     public static final int kControllerLeftVertical = 1;
     public static final int kControllerLeftHorizontal = 0;
     public static final int kControllerRightVertical = 5;
     public static final int kControllerRightHorizontal = 4;
+    
     public static final int kDriverControllerPOVLeft = 270;
     public static final int kDriverControllerPOVRight = 90;
     public static final int kDriverControllerPOVUp = 0;
@@ -46,7 +54,7 @@ public final class Constants {
     public static final double kGearRatio = 8.46;
     public static final double kMotorRampTime = 0.1;
     public static final double kWheelDiameterInches = 6.17;
-    
+
     // 21.5 inches in meters, measured midpoint center wheel to midpoint center wheel
     public static final double kTrackWidth = 0.546;
 
@@ -82,13 +90,17 @@ public final class Constants {
     public static final double kShooterI = 0;
     public static final double kShooterD = 0;
 
-    public static final double kIntakeIntakeMotorSpeed = 0;
+    /*
+     * Clockwise = positive number
+     * Counterclockwise = negative number 
+     */
+    public static final double kIntakeIntakeMotorSpeed = -0.70;
     public static final double kIntakeShooterMotorSpeed = 0;
-    public static final double kEjectIntakeMotorSpeed = 0;
+    public static final double kEjectIntakeMotorSpeed = 0.70;
     public static final double kEjectShooterMotorSpeed = 0;
     public static final double kSpinupIntakeMotorSpeed = 0;
-    public static final double kSpinupShooterMotorSpeed = 0;
-    public static final double kShootIntakeMotorSpeed = 0;
-    public static final double kShootShooterMotorSpeed = 0;
+    public static final double kSpinupShooterMotorSpeed = 0.65;
+    public static final double kShootIntakeMotorSpeed = -0.55;
+    public static final double kShootShooterMotorSpeed = 0.65;
   }
 }

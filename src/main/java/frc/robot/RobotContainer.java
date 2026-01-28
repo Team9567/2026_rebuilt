@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.FuelSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
@@ -25,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+  private final FuelSubsystem m_fuelSubsystem = new FuelSubsystem();
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandGenericHID m_driverController = new CommandGenericHID(OperatorConstants.kDriverControllerPort);
@@ -59,10 +61,13 @@ public class RobotContainer {
 
     Trigger lowGear = m_driverController.button(OperatorConstants.kDriverControllerY);
     m_drivetrainSubsystem.setGearTrigger(lowGear);
-    // Passes the trigger from RobotContainer to TabiSubsystem, binds the function
-    // to Y
+
     m_driverController.button(OperatorConstants.kDriverControllerA).onTrue(m_drivetrainSubsystem.driveCommand(2));
     m_driverController.button(OperatorConstants.kDriverControllerB).onTrue(m_drivetrainSubsystem.turnCommand(90));
+    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.80).onTrue(m_fuelSubsystem.shootCommand());
+    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80).onTrue(m_fuelSubsystem.spinupCommand());
+    m_driverController.button(OperatorConstants.kDriverControllerLeftBumper).onTrue(m_fuelSubsystem.intakeCommand());
+    m_driverController.button(OperatorConstants.kDriverControllerRightBumper).onTrue(m_fuelSubsystem.ejectCommand());
   }
 
   /**
