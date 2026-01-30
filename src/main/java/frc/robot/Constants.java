@@ -32,6 +32,9 @@ public final class Constants {
     public static final int kDriverControllerPOVDown = 180;
   }
   public static class DriveTrainConstants {
+    public static final boolean kIsEnabled = true;
+    public static final boolean kIsLimelightEnabled = false;
+    public static final String kLimelightNetworkName = "limelight";
     public static final int kLeftFrontMotorCanID = 1;
     public static final int kLeftBackMotorCanID = 3;
     public static final int kRightFrontMotorCanID = 2;

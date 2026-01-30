@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 import java.util.Optional;
@@ -19,6 +18,7 @@ import com.studica.frc.AHRS;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.LimelightHelpers;
 
 public class DrivetrainSubsystem extends SubsystemBase {
   SparkFlex leftFrontMotor = new SparkFlex(DriveTrainConstants.kLeftFrontMotorCanID, MotorType.kBrushless);
@@ -108,17 +109,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void arcadeDrive(double speed, double turn) {
     if (lowGearTrigger.isPresent()) {
       if (lowGearTrigger.get().getAsBoolean()) {
+        // The mathematics for the high/low gear and ArcadeDrive
         speed /= 4;
         turn /= 4;
       }
     }
-    drivetrain.arcadeDrive(speed, turn);
-    // The mathematics for the high/low gear and ArcadeDrive
+
+    arcadeDriveRaw(speed, turn);
   }
 
   // Same as arcadeDrive, but applies no speed adjustments (low gear)
   public void arcadeDriveRaw(double speed, double turn) {
-    drivetrain.arcadeDrive(speed, turn);
+    if (DriveTrainConstants.kIsEnabled) {
+      drivetrain.arcadeDrive(speed, turn);
+    }
   }
 
   public double getLeftEncoder() {
@@ -139,13 +143,40 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return (leftFrontMotor.getEncoder().getPosition() + rightBackMotor.getEncoder().getPosition()) / 2;
   }
 
+  // This method will be called once per scheduler run
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    // updates odometry
     odometry.update(m_gyro.getRotation2d(), new DifferentialDriveWheelPositions(getLeftEncoder(), getRightEncoder()));
+    if (DriveTrainConstants.kIsEnabled) {
+      // updates position based on visible april tags
+      LimelightHelpers.SetRobotOrientation(DriveTrainConstants.kLimelightNetworkName,
+          odometry.getEstimatedPosition().getRotation().getDegrees(),
+          0, 0, 0, 0, 0);
+      LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
+          .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
+
+      boolean doRejectUpdate = false;
+
+      // if our angular velocity is greater than 360 degrees per second, ignore vision
+      // updates
+      if (Math.abs(m_gyro.getRate()) > 360) {
+        doRejectUpdate = true;
+      }
+      if (mt2.tagCount == 0) {
+        doRejectUpdate = true;
+      }
+      if (!doRejectUpdate) {
+        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        odometry.addVisionMeasurement(
+            mt2.pose,
+            mt2.timestampSeconds);
+      }
+    }
+
+    // sets robot's positon on field based on gyro and limelight
     Pose2d bot = odometry.getEstimatedPosition();
     field.setRobotPose(bot);
-
   }
 
   @Override
