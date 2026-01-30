@@ -102,5 +102,8 @@ public final class Constants {
     public static final double kSpinupShooterMotorSpeed = 0.65;
     public static final double kShootIntakeMotorSpeed = -0.55;
     public static final double kShootShooterMotorSpeed = 0.65;
+
+    public static final double kShootShooterMotorVelocity = 0;
+    public static final double kShootIntakeMotorVelocity = 0;
   }
 }
