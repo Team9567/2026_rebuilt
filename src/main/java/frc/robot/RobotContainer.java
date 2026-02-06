@@ -62,13 +62,13 @@ public class RobotContainer {
     Trigger lowGear = m_driverController.button(OperatorConstants.kDriverControllerY);
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
-    m_driverController.button(OperatorConstants.kDriverControllerA).onTrue(m_drivetrainSubsystem.driveCommand(2));
-    m_driverController.button(OperatorConstants.kDriverControllerB).onTrue(m_drivetrainSubsystem.turnCommand(90));
-    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90).onTrue(m_fuelSubsystem.shootCommand());
-    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80).onTrue(m_fuelSubsystem.spinupCommand());
-    m_driverController.button(OperatorConstants.kDriverControllerLeftBumper).onTrue(m_fuelSubsystem.intakeCommand());
-    m_driverController.button(OperatorConstants.kDriverControllerRightBumper).onTrue(m_fuelSubsystem.ejectCommand());
-    m_driverController.button(OperatorConstants.kDriverControllerX).onTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
+    // m_driverController.button(OperatorConstants.kDriverControllerA).onTrue(m_drivetrainSubsystem.driveCommand(2));
+    // m_driverController.button(OperatorConstants.kDriverControllerB).onTrue(m_drivetrainSubsystem.turnCommand(90));
+    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90).whileTrue(m_fuelSubsystem.shootCommand());
+    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80).whileTrue(m_fuelSubsystem.spinupCommand());
+    m_driverController.button(OperatorConstants.kDriverControllerLeftBumper).whileTrue(m_fuelSubsystem.intakeCommand());
+    m_driverController.button(OperatorConstants.kDriverControllerRightBumper).whileTrue(m_fuelSubsystem.ejectCommand());
+    m_driverController.button(OperatorConstants.kDriverControllerX).whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
   }
 
   /**

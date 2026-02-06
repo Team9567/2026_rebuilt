@@ -33,11 +33,16 @@ public final class Constants {
     public static final int kDriverControllerLeftTrigger = 2;
     public static final int kDriverControllerRightTrigger = 3;
 
+    public static final int kDriverControllerBack = 7;
+    public static final int kDriverControllerStart = 8;
+    public static final int kDriverControllerLeftJoystickButton = 9;
+    public static final int kDriverControllerRightJoystickButton = 10;
+
     public static final int kControllerLeftVertical = 1;
     public static final int kControllerLeftHorizontal = 0;
     public static final int kControllerRightVertical = 5;
     public static final int kControllerRightHorizontal = 4;
-    
+
     public static final int kDriverControllerPOVLeft = 270;
     public static final int kDriverControllerPOVRight = 90;
     public static final int kDriverControllerPOVUp = 0;
@@ -55,10 +60,12 @@ public final class Constants {
     public static final double kMotorRampTime = 0.1;
     public static final double kWheelDiameterInches = 6.17;
 
-    // 21.5 inches in meters, measured midpoint center wheel to midpoint center wheel
+    // 21.5 inches in meters, measured midpoint center wheel to midpoint center
+    // wheel
     public static final double kTrackWidth = 0.546;
 
-    public static final double kPositionConversionFactor = Units.Inches.of(kWheelCircumference / kGearRatio).in(Units.Meters);
+    public static final double kPositionConversionFactor = Units.Inches.of(kWheelCircumference / kGearRatio)
+        .in(Units.Meters);
 
     public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;
     public static final double kDriveP = 6.0;
@@ -92,16 +99,16 @@ public final class Constants {
 
     /*
      * Clockwise = positive number
-     * Counterclockwise = negative number 
+     * Counterclockwise = negative number
      */
-    public static final double kIntakeIntakeMotorSpeed = -0.70;
-    public static final double kIntakeShooterMotorSpeed = 0;
-    public static final double kEjectIntakeMotorSpeed = 0.70;
-    public static final double kEjectShooterMotorSpeed = 0;
+    public static final double kIntakeIntakeMotorSpeed = -0.30; //used to be counter-clockwise
+    public static final double kIntakeShooterMotorSpeed = 0.30; 
+    public static final double kEjectIntakeMotorSpeed = 0.30;
+    public static final double kEjectShooterMotorSpeed = -0.30;
     public static final double kSpinupIntakeMotorSpeed = 0;
-    public static final double kSpinupShooterMotorSpeed = 0.65;
-    public static final double kShootIntakeMotorSpeed = -0.55;
-    public static final double kShootShooterMotorSpeed = 0.65;
+    public static final double kSpinupShooterMotorSpeed = 0.30;
+    public static final double kShootIntakeMotorSpeed = 0.30;
+    public static final double kShootShooterMotorSpeed = 0.30;
 
     public static final double kShootShooterMotorVelocity = 0;
     public static final double kShootIntakeMotorVelocity = 0;

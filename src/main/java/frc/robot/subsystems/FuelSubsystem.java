@@ -42,10 +42,10 @@ public class FuelSubsystem extends SubsystemBase {
        */
       SparkMaxConfig shooterConfig = new SparkMaxConfig();
       shooterConfig
-          .idleMode(IdleMode.kBrake)
+          .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(FuelConstants.kShooterMotorCurrentLimit)
           .voltageCompensation(FuelConstants.kShooterMotorVoltageCompens)
-          .inverted(true);
+          .inverted(false);
       shooterConfig.softLimit
           .forwardSoftLimitEnabled(false)
           .reverseSoftLimitEnabled(false);
@@ -198,6 +198,14 @@ public class FuelSubsystem extends SubsystemBase {
   public Command shootCommand() {
     if (FuelConstants.k_isEnabled) {
       return setCommand(FuelConstants.kShootShooterMotorSpeed, FuelConstants.kShootIntakeMotorSpeed);
+    } else {
+      return Commands.none();
+    }
+  }
+
+  public Command testCommand() {
+    if (FuelConstants.k_isEnabled) {
+      return setCommand(0.5, 0.5);
     } else {
       return Commands.none();
     }
