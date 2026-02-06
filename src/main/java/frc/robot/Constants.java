@@ -101,13 +101,13 @@ public final class Constants {
      * Clockwise = positive number
      * Counterclockwise = negative number
      */
-    public static final double kIntakeIntakeMotorSpeed = -0.30; //used to be counter-clockwise
+    public static final double kIntakeIntakeMotorSpeed = -1; //used to be counter-clockwise
     public static final double kIntakeShooterMotorSpeed = 0.30; 
-    public static final double kEjectIntakeMotorSpeed = 0.30;
+    public static final double kEjectIntakeMotorSpeed = 1.0;
     public static final double kEjectShooterMotorSpeed = -0.30;
     public static final double kSpinupIntakeMotorSpeed = 0;
     public static final double kSpinupShooterMotorSpeed = 0.30;
-    public static final double kShootIntakeMotorSpeed = 0.30;
+    public static final double kShootIntakeMotorSpeed = 1.0;
     public static final double kShootShooterMotorSpeed = 0.30;
 
     public static final double kShootShooterMotorVelocity = 0;

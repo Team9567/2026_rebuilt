@@ -78,7 +78,7 @@ public class FuelSubsystem extends SubsystemBase {
        */
       SparkMaxConfig intakeConfig = new SparkMaxConfig();
       intakeConfig
-          .idleMode(IdleMode.kBrake)
+          .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(FuelConstants.kIntakeMotorCurrentLimit)
           .voltageCompensation(FuelConstants.kIntakeMotorVoltageCompens)
           .inverted(true);
