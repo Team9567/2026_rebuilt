@@ -88,27 +88,32 @@ public final class Constants {
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
 
-    public static final double kShooterFeedForwardStatic = 0;
-    public static final double kShooterFeedForwardVelocity = 0;
+    public static final double kShooterFeedForwardStatic = 0.395;
+    public static final double kShooterFeedForwardVelocity = 1/7.8; // 1/6.462
     public static final double kShooterFeedForwardAccel = 0;
     public static final double kMaxAcceleration = 10;
     public static final double kProfileErrorRPS = 80;
-    public static final double kShooterP = 0;
+    public static final double kShooterP = 0.02;
     public static final double kShooterI = 0;
-    public static final double kShooterD = 0;
+    public static final double kShooterD = 0.025;
 
     /*
      * Clockwise = positive number
      * Counterclockwise = negative number
      */
-    public static final double kIntakeIntakeMotorSpeed = -1; //used to be counter-clockwise
+    public static final double kIntakeIntakeMotorSpeed = -1.0; 
     public static final double kIntakeShooterMotorSpeed = 0.30; 
     public static final double kEjectIntakeMotorSpeed = 1.0;
     public static final double kEjectShooterMotorSpeed = -0.30;
     public static final double kSpinupIntakeMotorSpeed = 0;
-    public static final double kSpinupShooterMotorSpeed = 0.30;
+    public static final double kSpinupShooterMotorSpeed = 0.50;
     public static final double kShootIntakeMotorSpeed = 1.0;
-    public static final double kShootShooterMotorSpeed = 0.30;
+    public static final double kShootShooterMotorSpeed = 0.50;
+
+    public static final double kShootShooterMotorVoltage = 3;
+    public static final double kShootIntakeMotorVoltage = 10;
+
+    // public static final double kSpinupShooterMotorVoltage = 10;
 
     public static final double kShootShooterMotorVelocity = 0;
     public static final double kShootIntakeMotorVelocity = 0;

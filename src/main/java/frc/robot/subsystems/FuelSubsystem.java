@@ -93,6 +93,8 @@ public class FuelSubsystem extends SubsystemBase {
 
       // Pass in stop when needed to be stopped.
       setDefaultCommand(stopCommand());
+
+      SmartDashboard.putNumber("shooter/rps", 0);
     }
   }
 
@@ -235,6 +237,7 @@ public class FuelSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_dashboardShooterRPS = SmartDashboard.getNumber("shooter/rps", -9567);
+    m_dashboardShooterRPS = SmartDashboard.getNumber("shooter/rps", 0);
+    SmartDashboard.putNumber("shooter/velocity", fuelShooterMotor.getEncoder().getVelocity());
   }
 }
