@@ -53,7 +53,14 @@ public final class Constants {
     public static final double kTurnI = 0 ;
     public static final double kTurnD = 0.005 ;
   }
-
+  public static class FuelHerderConstants {
+    public static int kLeftHerderMotor = 20;
+    public static int kRightHerderMotor = 21;
+    public static final double kPositionConversionFactor = 0;
+    public static final double kMotorRampTime = 0.1;
+    public static final double kForwardSoftLimit = 0; // not finished
+    public static final double kReverseSoftLimit = 50; // not finished
+  }
 
 }
 
