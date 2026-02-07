@@ -23,8 +23,11 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,6 +35,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.Constants;
 import frc.robot.LimelightHelpers;
 
 public class DrivetrainSubsystem extends SubsystemBase {
@@ -141,6 +145,40 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public double getAverageTicks() {
     return (leftFrontMotor.getEncoder().getPosition() + rightBackMotor.getEncoder().getPosition()) / 2;
+  }
+
+  public double getAngleToTarget(Pose2d target) {
+    var pose = getEstimatedPosition();
+    var theta = Math.atan((target.getY() - pose.getY()) / (target.getX() - pose.getX()));
+    var degrees = theta * (Math.PI / 180);
+    return degrees;
+  }
+
+  public double getDistanceToTarget(Pose2d target) {
+    var pose = getEstimatedPosition();
+    var distance = pose.getTranslation().minus(target.getTranslation()).getNorm();
+    return distance;
+  }
+
+  public double getAngleToHub() {
+    double angle = getAngleToTarget(new Pose2d(getAllianceHub(), new Rotation2d()));
+    SmartDashboard.putNumber("drivetrain/hub angle", angle);
+    return angle;
+  }
+
+  public double getDistanceToHub() {
+    double distance = getDistanceToTarget(new Pose2d(getAllianceHub(), new Rotation2d()));
+    SmartDashboard.putNumber("drivetrain/hub distance", distance);
+    return distance;
+  }
+
+  public Translation2d getAllianceHub() {
+    var alliance = DriverStation.getAlliance();
+    if (alliance.isEmpty() || alliance.get() == Alliance.Blue) {
+      return Constants.DriveTrainConstants.kBlueHubCoord;
+    } else {
+      return Constants.DriveTrainConstants.kRedHubCoord;
+    }
   }
 
   // This method will be called once per scheduler run

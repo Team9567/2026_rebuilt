@@ -37,23 +37,22 @@ public class DriveToPointCommand extends Command {
   public void initialize() {
     drivepid.setTolerance(0.05);
     turnpid.setTolerance(3);
-    var pose = m_subsystem.getEstimatedPosition();
-    var theta = Math.atan((m_targetPose.getY()-pose.getY())/(m_targetPose.getX()-pose.getX()));
-    var degrees = theta*(Math.PI/180);
-      m_targetPose = new Pose2d(m_targetPose.getX(),m_targetPose.getY(),new Rotation2d(degrees));
-      SmartDashboard.putNumber("drive to point/target pose/x", m_targetPose.getX());
-      SmartDashboard.putNumber("drive to point/target pose/y", m_targetPose.getY());
-      SmartDashboard.putNumber("drive to point/target pose/rotation", m_targetPose.getRotation().getDegrees());
+    var degrees = m_subsystem.getAngleToTarget(m_targetPose);
+    m_targetPose = new Pose2d(m_targetPose.getX(), m_targetPose.getY(), new Rotation2d(degrees));
+    SmartDashboard.putNumber("drive to point/target pose/x", m_targetPose.getX());
+    SmartDashboard.putNumber("drive to point/target pose/y", m_targetPose.getY());
+    SmartDashboard.putNumber("drive to point/target pose/rotation", m_targetPose.getRotation().getDegrees());
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     var pose = m_subsystem.getEstimatedPosition();
-    var distance = pose.getTranslation().minus(m_targetPose.getTranslation()).getNorm();
+    var distance = m_subsystem.getDistanceToTarget(m_targetPose);
     var robotRotation = m_targetPose.relativeTo(pose).getTranslation().getAngle().getDegrees();
 
-    // Adjusting distance and rotation to allow driving backwards to a point behind the robot.
+    // Adjusting distance and rotation to allow driving backwards to a point behind
+    // the robot.
     if (Math.abs(robotRotation) > 100) {
       distance *= -1;
       double angleSign = Math.signum(robotRotation);
@@ -62,8 +61,8 @@ public class DriveToPointCommand extends Command {
 
     double speed = 0;
     if (Math.abs(robotRotation) < 15) {
-     speed = drivepid.calculate(0, distance);
-     speed = MathUtil.clamp(speed, -0.30, 0.30);
+      speed = drivepid.calculate(0, distance);
+      speed = MathUtil.clamp(speed, -0.30, 0.30);
     }
 
     double rotation = turnpid.calculate(0, robotRotation);
@@ -77,12 +76,13 @@ public class DriveToPointCommand extends Command {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(drivepid.atSetpoint() && turnpid.atSetpoint()){
+    if (drivepid.atSetpoint() && turnpid.atSetpoint()) {
       return true;
     } else {
       return false;
