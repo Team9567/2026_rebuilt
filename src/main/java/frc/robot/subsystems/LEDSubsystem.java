@@ -49,6 +49,22 @@ public class LEDSubsystem extends SubsystemBase {
         }
     }
 
+    public void setHighGear() {
+        try {
+            wled.sendString("{\"on\":true,\"bri\":255}\n");
+        } catch (Exception e) {
+            System.err.println("Failed to enable LEDs: " + e.getMessage());
+        }
+    }
+    
+    public void setLowGear() {
+        try {
+            wled.sendString("{\"on\":true,\"bri\":127}\n");
+        } catch (Exception e) {
+            System.err.println("Failed to enable LEDs: " + e.getMessage());
+        }
+    }
+
     public void setDisabled() {
         try {
             wled.sendString("{\"on\":true,\"bri\":50}\n");
