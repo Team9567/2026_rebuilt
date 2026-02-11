@@ -22,6 +22,7 @@ import edu.wpi.first.units.Units;
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
+    public static final int kControllerControllerPort = 1;
 
     public static final int kDriverControllerA = 1;
     public static final int kDriverControllerB = 2;

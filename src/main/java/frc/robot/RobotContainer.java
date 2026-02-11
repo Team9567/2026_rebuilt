@@ -31,6 +31,7 @@ public class RobotContainer {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandGenericHID m_driverController = new CommandGenericHID(OperatorConstants.kDriverControllerPort);
+  private final CommandGenericHID m_controllerController = new CommandGenericHID(OperatorConstants.kControllerControllerPort);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -65,11 +66,13 @@ public class RobotContainer {
 
     // m_driverController.button(OperatorConstants.kDriverControllerA).onTrue(m_drivetrainSubsystem.driveCommand(2));
     // m_driverController.button(OperatorConstants.kDriverControllerB).onTrue(m_drivetrainSubsystem.turnCommand(90));
-    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90).whileTrue(m_fuelSubsystem.setVoltageCommand(FuelConstants.kShootShooterMotorVoltage, FuelConstants.kShootIntakeMotorVoltage));
-    m_driverController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80).whileTrue(m_fuelSubsystem.spinupCommand());
-    m_driverController.button(OperatorConstants.kDriverControllerLeftBumper).whileTrue(m_fuelSubsystem.intakeCommand());
-    m_driverController.button(OperatorConstants.kDriverControllerRightBumper).whileTrue(m_fuelSubsystem.ejectCommand());
-    m_driverController.button(OperatorConstants.kDriverControllerX).whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
+    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90).whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
+    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80).whileTrue(m_fuelSubsystem.spinupCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper).whileTrue(m_fuelSubsystem.intakeCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerRightBumper).whileTrue(m_fuelSubsystem.ejectCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerX).whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
+    // m_controllerController.button(OperatorConstants.kDriverControllerX).whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
+    // m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90).whileTrue(m_fuelSubsystem.setVoltageCommand(FuelConstants.kShootShooterMotorVoltage, FuelConstants.kShootIntakeMotorVoltage));
   }
 
   /**
