@@ -114,8 +114,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
     if (lowGearTrigger.isPresent()) {
       if (lowGearTrigger.get().getAsBoolean()) {
         // The mathematics for the high/low gear and ArcadeDrive
-        speed /= 4;
-        turn /= 4;
+        speed /= 2;
+        turn /= 2;
       }
     }
 
