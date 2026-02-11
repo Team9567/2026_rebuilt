@@ -5,7 +5,10 @@
 package frc.robot;
 
 import com.studica.frc.AHRS.NavXComType;
-import edu.wpi.first.units.Units;
+
+import edu.wpi.first.math.geometry.Translation2d;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 
 public final class Constants {
   public static class OperatorConstants {
@@ -39,6 +42,9 @@ public final class Constants {
   }
 
   public static class DriveTrainConstants {
+    public static final boolean kIsEnabled = true;
+    public static final boolean kIsLimelightEnabled = false;
+    public static final String kLimelightNetworkName = "limelight";
     public static final int kLeftFrontMotorCanID = 1;
     public static final int kLeftBackMotorCanID = 3;
     public static final int kRightFrontMotorCanID = 2;
@@ -48,13 +54,11 @@ public final class Constants {
     public static final double kGearRatio = 8.46;
     public static final double kMotorRampTime = 0.1;
     public static final double kWheelDiameterInches = 6.17;
+    public static final double kTrackWidth = 0.546; // 21.5 inches in meters, measured midpoint center wheel to midpoint
+                                                    // center wheel
 
-    // 21.5 inches in meters, measured midpoint center wheel to midpoint center
-    // wheel
-    public static final double kTrackWidth = 0.546;
-
-    public static final double kPositionConversionFactor = Units.Inches.of(kWheelCircumference / kGearRatio)
-        .in(Units.Meters);
+    public static final double kPositionConversionFactor = Inches.of(kWheelCircumference / kGearRatio)
+        .in(Meters);
 
     public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;
     public static final double kDriveP = 6.0;
@@ -63,6 +67,16 @@ public final class Constants {
     public static final double kTurnP = 0.125;
     public static final double kTurnI = 0;
     public static final double kTurnD = 0.005;
+
+    public static final int kBlueHubBlueSideTagID = 26;
+    public static final int kBlueHubRedSideTagID = 20;
+    public static final int kRedHubRedSideTagID = 10;
+    public static final int kRedHubBlueSideTagID = 4;
+
+    public static final Translation2d kBlueHubCoord = new Translation2d(Inches.of(181.56).in(Meters),
+        Inches.of(158.32).in(Meters));
+    public static final Translation2d kRedHubCoord = new Translation2d(Inches.of(650.12-181.56).in(Meters),
+        Inches.of(158.32).in(Meters));
   }
 
   public static class FuelConstants {
