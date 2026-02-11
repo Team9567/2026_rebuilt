@@ -7,18 +7,6 @@ package frc.robot;
 import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.units.Units;
 
-/**
- * The Constants class provides a convenient place for teams to hold robot-wide
- * numerical or boolean
- * constants. This class should not be used for any other purpose. All constants
- * should be declared
- * globally (i.e. public static). Do not put anything functional in this class.
- *
- * <p>
- * It is advised to statically import this class (or one of its inner classes)
- * wherever the
- * constants are needed, to reduce verbosity.
- */
 public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
@@ -98,10 +86,6 @@ public final class Constants {
     public static final double kShooterI = 0;
     public static final double kShooterD = 0.025;
 
-    /*
-     * Clockwise = positive number
-     * Counterclockwise = negative number
-     */
     public static final double kIntakeIntakeMotorSpeed = -1.0; 
     public static final double kIntakeShooterMotorSpeed = 0.30; 
     public static final double kEjectIntakeMotorSpeed = 1.0;
@@ -113,10 +97,5 @@ public final class Constants {
 
     public static final double kShootShooterMotorVoltage = 3;
     public static final double kShootIntakeMotorVoltage = 10;
-
-    // public static final double kSpinupShooterMotorVoltage = 10;
-
-    public static final double kShootShooterMotorVelocity = 0;
-    public static final double kShootIntakeMotorVelocity = 0;
   }
 }

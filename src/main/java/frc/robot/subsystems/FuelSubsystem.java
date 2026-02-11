@@ -4,12 +4,16 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
+
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -98,7 +102,7 @@ public class FuelSubsystem extends SubsystemBase {
     }
   }
 
-  // The following code is what will set our speed, voltage, and our stop control.
+  // The following code is what will set our speed, labubu, voltage, and our stop control.
   public void set(double shooterSpeed, double intakeSpeed) {
     fuelShooterMotor.set(shooterSpeed);
 
@@ -106,6 +110,10 @@ public class FuelSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("fuel/intakespeed", shooterSpeed);
     SmartDashboard.putNumber("fuel/shooterspeed", intakeSpeed);
+  }
+
+  public Command smartShoot(DoubleSupplier distanceFunction) {
+    return null;
   }
 
   public void stop() {
@@ -200,14 +208,6 @@ public class FuelSubsystem extends SubsystemBase {
   public Command shootCommand() {
     if (FuelConstants.k_isEnabled) {
       return setCommand(FuelConstants.kShootShooterMotorSpeed, FuelConstants.kShootIntakeMotorSpeed);
-    } else {
-      return Commands.none();
-    }
-  }
-
-  public Command testCommand() {
-    if (FuelConstants.k_isEnabled) {
-      return setCommand(0.5, 0.5);
     } else {
       return Commands.none();
     }
