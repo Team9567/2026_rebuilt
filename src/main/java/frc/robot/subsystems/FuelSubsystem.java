@@ -5,6 +5,9 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.PersistMode;
@@ -13,7 +16,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -30,6 +34,15 @@ public class FuelSubsystem extends SubsystemBase {
   PIDController shooterController = new PIDController(FuelConstants.kShooterP, FuelConstants.kShooterI,
       FuelConstants.kShooterD);
   private double m_dashboardShooterRPS;
+
+  public static final InterpolatingDoubleTreeMap distanceToRPS = new InterpolatingDoubleTreeMap();
+
+  static {
+    Distance inches = Inches.of(100);
+
+    distanceToRPS.put(1.0, 70.0);
+    distanceToRPS.put(inches.in(Meters), 60.0);
+  }
 
   public FuelSubsystem() {
     if (FuelConstants.k_isEnabled) {
@@ -112,8 +125,23 @@ public class FuelSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("fuel/shooterspeed", intakeSpeed);
   }
 
+  public void smartShoot(double distance) {
+    double rps = distanceToRPS.get(distance);
+    setShooterVelocity(rps);
+  }
+
+
   public Command smartShoot(DoubleSupplier distanceFunction) {
-    return null;
+    return  Commands.run(
+      () -> {
+        double distance = distanceFunction.getAsDouble();
+        if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
+          double distanceRps = distanceToRPS.get(distance);
+          setShooterVelocity(distanceRps);
+        } else {
+          setShooterVelocity(0); //Not in between range we can shoot.
+        }
+      }, this);
   }
 
   public void stop() {

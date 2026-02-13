@@ -106,6 +106,9 @@ public final class Constants {
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
 
+    public static final double kMaxDistanceFromHub = 9.5;
+    public static final double kMinDistanceFromHub = 1.5;
+
     public static final double kShooterFeedForwardStatic = 0.395;
     public static final double kShooterFeedForwardVelocity = 1 / 7.8; // 1/6.462
     public static final double kShooterFeedForwardAccel = 0;
