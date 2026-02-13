@@ -4,18 +4,21 @@
 
 package frc.robot;
 
-import frc.robot.Constants.FuelConstants;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.FuelSubsystem;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.LEDSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -32,9 +35,12 @@ public class RobotContainer {
   SendableChooser<Command> autochooser = new SendableChooser<>();
   private final FuelSubsystem m_fuelSubsystem = new FuelSubsystem();
 
+  private final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandGenericHID m_driverController = new CommandGenericHID(OperatorConstants.kDriverControllerPort);
-  private final CommandGenericHID m_controllerController = new CommandGenericHID(OperatorConstants.kControllerControllerPort);
+  private final CommandGenericHID m_controllerController = new CommandGenericHID(
+      OperatorConstants.kControllerControllerPort);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
@@ -62,19 +68,34 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    // Set alliance color when robot is enabled
+    new Trigger(DriverStation::isEnabled)
+        .onTrue(new InstantCommand(m_ledSubsystem::setAllianceColor, m_ledSubsystem));
+
+    // Dim LEDs when disabled
+    new Trigger(DriverStation::isDisabled)
+        .onTrue(new InstantCommand(m_ledSubsystem::setDisabled, m_ledSubsystem));
+
     m_drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> {
       m_drivetrainSubsystem.arcadeDrive(-m_driverController.getRawAxis(OperatorConstants.kControllerLeftVertical),
           -m_driverController.getRawAxis(OperatorConstants.kControllerRightHorizontal));
     }, m_drivetrainSubsystem));
 
     Trigger lowGear = m_driverController.button(OperatorConstants.kDriverControllerY);
+    lowGear.onTrue(new InstantCommand(m_ledSubsystem::setLowGear, m_ledSubsystem))
+        .onFalse(new InstantCommand(m_ledSubsystem::setHighGear, m_ledSubsystem));
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
-    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90).whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
-    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80).whileTrue(m_fuelSubsystem.spinupCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper).whileTrue(m_fuelSubsystem.intakeCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerRightBumper).whileTrue(m_fuelSubsystem.ejectCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerX).whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
+    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90)
+        .whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
+    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80)
+        .whileTrue(m_fuelSubsystem.spinupCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper)
+        .whileTrue(m_fuelSubsystem.intakeCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerRightBumper)
+        .whileTrue(m_fuelSubsystem.ejectCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerX)
+        .whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
   }
 
   /**
