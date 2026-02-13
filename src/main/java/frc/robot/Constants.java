@@ -112,4 +112,13 @@ public final class Constants {
     public static final double kShootShooterMotorVoltage = 3;
     public static final double kShootIntakeMotorVoltage = 10;
   }
+
+  public static class LEDConstants{
+    public static final String kLEDSetRed = "{\"seg\":[{\"col\":[[255,0,0]]}]}\n";
+    public static final String kLedSetBlue = "{\"seg\":[{\"col\":[[0,0,255]]}]}\n";
+    public static final String ksetEnabled = "{\"on\":true,\"bri\":255}\n";
+    public static final String ksetHighGear = "{\"on\":true,\"bri\":255}\n";
+    public static final String ksetLowGear = "{\"on\":true,\"bri\":127}\n";
+    public static final String ksetDisabled = "{\"on\":true,\"bri\":50}\n";
+  }
 }

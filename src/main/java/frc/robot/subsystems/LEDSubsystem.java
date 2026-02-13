@@ -7,6 +7,8 @@ import robowled.wledpipe.WledPipe;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.LEDConstants;
 
 public class LEDSubsystem extends SubsystemBase {
     private WledPipe wled;
@@ -30,10 +32,10 @@ public class LEDSubsystem extends SubsystemBase {
             if (alliance.isPresent()) {
                 if (alliance.get() == DriverStation.Alliance.Red) {
                     // Red alliance - set LEDs to red
-                    wled.sendString("{\"seg\":[{\"col\":[[255,0,0]]}]}\n");
+                    wled.sendString(LEDConstants.kLEDSetRed);
                 } else {
                     // Blue alliance - set LEDs to blue
-                    wled.sendString("{\"seg\":[{\"col\":[[0,0,255]]}]}\n");
+                    wled.sendString(LEDConstants.kLedSetBlue);
                 }
             }
         } catch (Exception e) {
@@ -43,7 +45,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     public void setEnabled() {
         try {
-            wled.sendString("{\"on\":true,\"bri\":255}\n");
+            wled.sendString(LEDConstants.ksetEnabled);
         } catch (Exception e) {
             System.err.println("Failed to enable LEDs: " + e.getMessage());
         }
@@ -51,7 +53,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     public void setHighGear() {
         try {
-            wled.sendString("{\"on\":true,\"bri\":255}\n");
+            wled.sendString(LEDConstants.ksetHighGear);
         } catch (Exception e) {
             System.err.println("Failed to enable LEDs: " + e.getMessage());
         }
@@ -59,7 +61,7 @@ public class LEDSubsystem extends SubsystemBase {
     
     public void setLowGear() {
         try {
-            wled.sendString("{\"on\":true,\"bri\":127}\n");
+            wled.sendString(LEDConstants.ksetLowGear);
         } catch (Exception e) {
             System.err.println("Failed to enable LEDs: " + e.getMessage());
         }
@@ -67,7 +69,7 @@ public class LEDSubsystem extends SubsystemBase {
 
     public void setDisabled() {
         try {
-            wled.sendString("{\"on\":true,\"bri\":50}\n");
+            wled.sendString(LEDConstants.ksetDisabled);
         } catch (Exception e) {
             System.err.println("Failed to dim LEDs: " + e.getMessage());
         }
