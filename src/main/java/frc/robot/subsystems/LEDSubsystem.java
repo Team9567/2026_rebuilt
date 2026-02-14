@@ -74,4 +74,13 @@ public class LEDSubsystem extends SubsystemBase {
             System.err.println("Failed to dim LEDs: " + e.getMessage());
         }
     }
+
+    
+    public void setTimeRunningOut() {
+        try {
+            wled.sendString(LEDConstants.ksetTimeRunningOut);
+        } catch (Exception e) {
+            System.err.println("Failed to dim LEDs: " + e.getMessage());
+        }
+    }
 }

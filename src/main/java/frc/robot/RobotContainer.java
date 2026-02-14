@@ -14,11 +14,13 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.LEDConstants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.FuelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
+import edu.wpi.first.wpilibj.Timer;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -68,6 +70,9 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    new Trigger(() -> { return Timer.getMatchTime() < LEDConstants.kTimeRunningOutThreshold;})
+      .onTrue(new InstantCommand(m_ledSubsystem::setTimeRunningOut, m_ledSubsystem));
+
     // Set alliance color when robot is enabled
     new Trigger(DriverStation::isEnabled)
         .onTrue(new InstantCommand(m_ledSubsystem::setAllianceColor, m_ledSubsystem));
