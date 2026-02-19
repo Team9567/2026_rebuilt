@@ -16,24 +16,28 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
+
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.FuelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
 /**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
+ * the {@link Robot} periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   SendableChooser<Command> autochooser = new SendableChooser<>();
   private final FuelSubsystem m_fuelSubsystem = new FuelSubsystem();
+  private final ClimberSubsystem m_climberSubsystem = new ClimberSubsystem();
 
   private final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
 
@@ -86,16 +90,21 @@ public class RobotContainer {
         .onFalse(new InstantCommand(m_ledSubsystem::setHighGear, m_ledSubsystem));
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
-    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90)
-        .whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
-    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80)
-        .whileTrue(m_fuelSubsystem.spinupCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper)
-        .whileTrue(m_fuelSubsystem.intakeCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerRightBumper)
-        .whileTrue(m_fuelSubsystem.ejectCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerX)
-        .whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
+    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90).whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
+    m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80).whileTrue(m_fuelSubsystem.spinupCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper).whileTrue(m_fuelSubsystem.intakeCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerRightBumper).whileTrue(m_fuelSubsystem.ejectCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerX).whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerStart).onTrue(m_climberSubsystem.homeCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerY).onTrue(m_climberSubsystem.startClimbCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerB).onTrue(m_climberSubsystem.hangCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerA).onTrue(m_climberSubsystem.climbCommand());
+
+    DoubleSupplier getGyroZValue = ()->{
+      return m_drivetrainSubsystem.getGyroZValue();
+    };
+
+    m_climberSubsystem.setZSupplier(getGyroZValue); 
   }
 
   /**

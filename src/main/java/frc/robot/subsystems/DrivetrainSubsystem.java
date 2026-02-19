@@ -139,6 +139,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return encoder;
   }
 
+  public float getGyroZValue() {
+    float altitude = m_gyro.getAltitude();
+    return altitude;
+  }
+
   public Pose2d getEstimatedPosition() {
     return odometry.getEstimatedPosition();
   }
@@ -196,8 +201,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
       boolean doRejectUpdate = false;
 
-      // if our angular velocity is greater than 360 degrees per second, ignore vision
-      // updates
+      // if our angular velocity is greater than 360 degrees per second, ignore vision updates
       if (Math.abs(m_gyro.getRate()) > 360) {
         doRejectUpdate = true;
       }
