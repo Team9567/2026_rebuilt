@@ -8,9 +8,11 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandGenericHID;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -26,6 +28,8 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
 
+  SlewRateLimiter linearRateLimiter = new SlewRateLimiter(1.0);
+  SlewRateLimiter turnRateLimiter = new SlewRateLimiter(0.8);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandGenericHID m_driverController = new CommandGenericHID(OperatorConstants.kDriverControllerPort);
 
