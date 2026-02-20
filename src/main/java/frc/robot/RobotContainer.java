@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import frc.robot.commands.ExampleCommand;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,8 +23,6 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.FuelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
@@ -41,6 +41,8 @@ public class RobotContainer {
 
   private final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
 
+  SlewRateLimiter linearRateLimiter = new SlewRateLimiter(1.0);
+  SlewRateLimiter turnRateLimiter = new SlewRateLimiter(0.8);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandGenericHID m_driverController = new CommandGenericHID(OperatorConstants.kDriverControllerPort);
   private final CommandGenericHID m_controllerController = new CommandGenericHID(
