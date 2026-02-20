@@ -16,6 +16,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -29,8 +30,8 @@ public class ClimberSubsystem extends SubsystemBase {
   // Constants
   private static boolean kIsEnabled = false;
   private final int canID = 29; // placeholder
-  private final double gearRatio = 5.1515; // placeholder
-  private final double kP = 1; // placeholder
+  private final double gearRatio = 0;
+  private final double kP = 0; // placeholder
   private final double kI = 0;
   private final double kD = 0;
   private final double kS = 0;
@@ -119,6 +120,15 @@ public class ClimberSubsystem extends SubsystemBase {
    */
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Climber/Encoder position", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("Climber Output Current", motor.getOutputCurrent());
+
+    if (this.getCurrentCommand() == this.getDefaultCommand()) {
+      SmartDashboard.putString("Climber - Current Command", "Idle?");
+    } else {
+      String cClimberCommandName = this.getCurrentCommand().getName();
+      SmartDashboard.putString("Climber - Current Command", cClimberCommandName);
+    }
   }
 
   /**
@@ -286,7 +296,7 @@ public class ClimberSubsystem extends SubsystemBase {
         }).until(() -> {
           double currentHeight = getPosition() + climberOffsetMeters;
           return Math.abs(heightMeters - currentHeight) < 0.02; // 2cm tolerance
-        });
+        }).withName("Move to height Command");
       }
     }
     return Commands.none();
@@ -305,32 +315,32 @@ public class ClimberSubsystem extends SubsystemBase {
       } else {
         motor.set(-0.1);
       }
-    });
+    }).withName("Home Command");
   }
 
   public Command hangCommand() {
     return run(() -> {
       setPosition(minClimbHeightMeters);
-    });
+    }).withName("Hang Command");
   }
 
   public Command startClimbCommand() {
     return run(() -> {
       setPosition(maxClimbHeightMeters);
-    });
+    }).withName("Start Climb Command");
   }
 
   public Command climbCommand() {
     return startClimbCommand()
-      .until(() -> motor.getClosedLoopController().isAtSetpoint())
-    .andThen(hangCommand())
-      .until(() -> motor.getClosedLoopController().isAtSetpoint());
+        .until(() -> motor.getClosedLoopController().isAtSetpoint())
+        .andThen(hangCommand())
+        .until(() -> motor.getClosedLoopController().isAtSetpoint());
   }
 
   public Command unclimbCommand() {
     return run(() -> {
       setPosition(maxClimbHeightMeters);
-    });
+    }).withName("Unclimb Command");
   }
 
   /**
@@ -339,7 +349,7 @@ public class ClimberSubsystem extends SubsystemBase {
    * @return A command that stops the elevator
    */
   public Command stopCommand() {
-    return runOnce(() -> setVelocity(0));
+    return runOnce(() -> setVelocity(0)).withName("Stop Command");
   }
 
   /**
