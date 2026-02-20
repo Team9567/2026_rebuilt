@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
 import java.util.Optional;
@@ -19,12 +18,16 @@ import com.studica.frc.AHRS;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.DifferentialDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -32,6 +35,8 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
+import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 
 public class DrivetrainSubsystem extends SubsystemBase {
   SparkFlex leftFrontMotor = new SparkFlex(DriveTrainConstants.kLeftFrontMotorCanID, MotorType.kBrushless);
@@ -108,17 +113,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void arcadeDrive(double speed, double turn) {
     if (lowGearTrigger.isPresent()) {
       if (lowGearTrigger.get().getAsBoolean()) {
-        speed /= 4;
-        turn /= 4;
+        // The mathematics for the high/low gear and ArcadeDrive
+        speed /= 2;
+        turn /= 2;
       }
     }
-    drivetrain.arcadeDrive(speed, turn);
-    // The mathematics for the high/low gear and ArcadeDrive
+
+    arcadeDriveRaw(speed, turn);
   }
 
   // Same as arcadeDrive, but applies no speed adjustments (low gear)
   public void arcadeDriveRaw(double speed, double turn) {
-    drivetrain.arcadeDrive(speed, turn);
+    if (DriveTrainConstants.kIsEnabled) {
+      drivetrain.arcadeDrive(speed, turn);
+    }
   }
 
   public double getLeftEncoder() {
@@ -139,13 +147,74 @@ public class DrivetrainSubsystem extends SubsystemBase {
     return (leftFrontMotor.getEncoder().getPosition() + rightBackMotor.getEncoder().getPosition()) / 2;
   }
 
+  public double getAngleToTarget(Pose2d target) {
+    var pose = getEstimatedPosition();
+    var theta = Math.atan((target.getY() - pose.getY()) / (target.getX() - pose.getX()));
+    var degrees = theta * (Math.PI / 180);
+    return degrees;
+  }
+
+  public double getDistanceToTarget(Pose2d target) {
+    var pose = getEstimatedPosition();
+    var distance = pose.getTranslation().minus(target.getTranslation()).getNorm();
+    return distance;
+  }
+
+  public double getAngleToHub() {
+    double angle = getAngleToTarget(new Pose2d(getAllianceHub(), new Rotation2d()));
+    SmartDashboard.putNumber("drivetrain/hub angle", angle);
+    return angle;
+  }
+
+  public double getDistanceToHub() {
+    double distance = getDistanceToTarget(new Pose2d(getAllianceHub(), new Rotation2d()));
+    SmartDashboard.putNumber("drivetrain/hub distance", distance);
+    return distance;
+  }
+
+  public Translation2d getAllianceHub() {
+    var alliance = DriverStation.getAlliance();
+    if (alliance.isEmpty() || alliance.get() == Alliance.Blue) {
+      return Constants.DriveTrainConstants.kBlueHubCoord;
+    } else {
+      return Constants.DriveTrainConstants.kRedHubCoord;
+    }
+  }
+
+  // This method will be called once per scheduler run
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    // updates odometry
     odometry.update(m_gyro.getRotation2d(), new DifferentialDriveWheelPositions(getLeftEncoder(), getRightEncoder()));
+    if (DriveTrainConstants.kIsEnabled) {
+      // updates position based on visible april tags
+      LimelightHelpers.SetRobotOrientation(DriveTrainConstants.kLimelightNetworkName,
+          odometry.getEstimatedPosition().getRotation().getDegrees(),
+          0, 0, 0, 0, 0);
+      LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
+          .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
+
+      boolean doRejectUpdate = false;
+
+      // if our angular velocity is greater than 360 degrees per second, ignore vision
+      // updates
+      if (Math.abs(m_gyro.getRate()) > 360) {
+        doRejectUpdate = true;
+      }
+      if (mt2.tagCount == 0) {
+        doRejectUpdate = true;
+      }
+      if (!doRejectUpdate) {
+        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        odometry.addVisionMeasurement(
+            mt2.pose,
+            mt2.timestampSeconds);
+      }
+    }
+
+    // sets robot's positon on field based on gyro and limelight
     Pose2d bot = odometry.getEstimatedPosition();
     field.setRobotPose(bot);
-
   }
 
   @Override
