@@ -78,6 +78,19 @@ public final class Constants {
     public static final Translation2d kRedHubCoord = new Translation2d(Inches.of(650.12-181.56).in(Meters),
         Inches.of(158.32).in(Meters));
   }
+  public static class FuelHerderConstants {
+    public static int kLeftHerderMotor = 7;
+    public static int kRightHerderMotor = 8;
+    public static final double kPositionConversionFactor = 0;
+    public static final double kMotorRampTime = 0.1;
+    public static final double kLeftForwardSoftLimit = 5.2; //needs different number
+    public static final double kReverseSoftLimit = 0;
+    public static final double kRightForwardSoftLimit = 5.2; //needs different number
+    public static final double kRetractArmSpeed = -0.1;
+    public static final double kExtendArmSpeed = 0.1;
+    public static final double kRightCurrentThreshold = 1;
+    public static final double kLeftCurrentThreshold = 1;
+  }
 
   public static class FuelConstants {
     public static final boolean k_isEnabled = true;
