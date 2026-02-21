@@ -98,6 +98,9 @@ public class RobotContainer {
         .onFalse(new InstantCommand(m_ledSubsystem::setHighGear, m_ledSubsystem));
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
+    Trigger reverseGear = m_driverController.button(OperatorConstants.kDriverControllerA);
+    m_drivetrainSubsystem.setReverseGearTrigger(reverseGear);
+
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90)
         .whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80)

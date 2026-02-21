@@ -57,6 +57,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
       DriveTrainConstants.kTurnD);
 
   Optional<Trigger> lowGearTrigger;
+  Optional<Trigger> reverseGearTrigger;
 
   /** Creates a new ExampleSubsystem. */
   public DrivetrainSubsystem() {
@@ -108,6 +109,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
   public void setGearTrigger(Trigger t) {
     lowGearTrigger = Optional.of(t);
     // Sets t to a trigger and sending it to RobotContainer
+  }
+
+  public void setReverseGearTrigger(Trigger t) {
+    reverseGearTrigger = Optional.of(t);
   }
 
   public void arcadeDrive(double speed, double turn) {
