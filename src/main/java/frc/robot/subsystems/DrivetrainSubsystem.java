@@ -119,8 +119,17 @@ public class DrivetrainSubsystem extends SubsystemBase {
       }
     }
 
+    if (reverseGearTrigger.isPresent()) {
+      if (reverseGearTrigger.get().getAsBoolean()) {
+        // The mathematics for the reverse gear and ArcadeDrive
+        speed *= -1;
+        turn *= -1;
+      }
+    }
+
     arcadeDriveRaw(speed, turn);
   }
+
 
   // Same as arcadeDrive, but applies no speed adjustments (low gear)
   public void arcadeDriveRaw(double speed, double turn) {
