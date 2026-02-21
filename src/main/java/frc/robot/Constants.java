@@ -7,6 +7,8 @@ package frc.robot;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.geometry.Translation2d;
+
+import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -68,6 +70,8 @@ public final class Constants {
     public static final double kTurnI = 0;
     public static final double kTurnD = 0.005;
 
+    public static final double kArmLength = Inches.of(10).in(Meters);
+
     public static final int kBlueHubBlueSideTagID = 26;
     public static final int kBlueHubRedSideTagID = 20;
     public static final int kRedHubRedSideTagID = 10;
@@ -77,6 +81,10 @@ public final class Constants {
         Inches.of(158.32).in(Meters));
     public static final Translation2d kRedHubCoord = new Translation2d(Inches.of(650.12 - 181.56).in(Meters),
         Inches.of(158.32).in(Meters));
+    public static final Translation2d kBlueTowerCoord = new Translation2d(Inches.of(45).in(Meters),
+        Inches.of(158.84 - 11.38).in(Meters));
+    public static final Translation2d kRedTowerCoord = new Translation2d(Inches.of(651.22 - 45).in(Meters),
+        Inches.of(158.84 + 11.38).in(Meters));
   }
 
   public static class FuelHerderConstants {

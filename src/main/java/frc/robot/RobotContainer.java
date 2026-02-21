@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,14 +19,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Autos.Closeness;
+import frc.robot.commands.Autos.Handed;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.FuelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
@@ -42,7 +41,10 @@ public class RobotContainer {
   SlewRateLimiter linearRateLimiter = new SlewRateLimiter(1.0);
   SlewRateLimiter turnRateLimiter = new SlewRateLimiter(0.8);
 
-  SendableChooser<Command> autochooser = new SendableChooser<>();
+  SendableChooser<Command> autochooser1 = new SendableChooser<>();
+  SendableChooser<Command> autochooser2 = new SendableChooser<>();
+  SendableChooser<Handed> climbHandChooser = new SendableChooser<>();
+  SendableChooser<Closeness> climbCloseChooser = new SendableChooser<>();
   private final FuelSubsystem m_fuelSubsystem = new FuelSubsystem();
   private final ClimberSubsystem m_climberSubsystem = new ClimberSubsystem();
 
@@ -59,9 +61,21 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
-    autochooser.addOption("nothing", Commands.none());
-    autochooser.addOption("exampleAuto", Autos.exampleAuto(m_drivetrainSubsystem));
-    SmartDashboard.putData("AutoChooser", autochooser);
+    climbHandChooser.addOption("left", Handed.Left);
+    climbHandChooser.addOption("right", Handed.Right);
+    climbCloseChooser.addOption("near", Closeness.Near);
+    climbCloseChooser.addOption("far", Closeness.Far);
+    autochooser1.addOption("Just Shoot", Autos.justShoot(m_fuelSubsystem));
+    autochooser1.addOption("Smart Shoot", Autos.smartShoot(m_fuelSubsystem, m_drivetrainSubsystem));
+    autochooser1.addOption("Smart Climb", Autos.smartClimb(m_climberSubsystem, m_drivetrainSubsystem,
+        climbHandChooser.getSelected(), climbCloseChooser.getSelected()));
+    autochooser2.addOption("nothing", Commands.none());
+    autochooser2.addOption("Smart Climb", Autos.smartClimb(m_climberSubsystem, m_drivetrainSubsystem,
+        climbHandChooser.getSelected(), climbCloseChooser.getSelected()));
+    SmartDashboard.putData("AutoChooser1", autochooser1);
+    SmartDashboard.putData("AutoChooser2", autochooser2);
+    SmartDashboard.putData("climb distance", climbCloseChooser);
+    SmartDashboard.putData("climb handed", climbHandChooser);
   }
 
   /**
@@ -127,6 +141,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return Autos.exampleAuto(m_drivetrainSubsystem);
+    return autochooser1.getSelected().andThen(autochooser2.getSelected());
   }
 }
