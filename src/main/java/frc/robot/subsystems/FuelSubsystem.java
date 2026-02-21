@@ -5,6 +5,11 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 
+import static edu.wpi.first.units.Units.Feet;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.InchesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
+
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.PersistMode;
@@ -13,7 +18,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -25,11 +31,21 @@ import frc.robot.Constants.FuelConstants;
 public class FuelSubsystem extends SubsystemBase {
   private SparkMax fuelShooterMotor;
   private SparkMax fuelIntakeMotor;
+  private final DrivetrainSubsystem m_DrivetrainSubsystem = new DrivetrainSubsystem();
   SimpleMotorFeedforward shooterFeedforward = new SimpleMotorFeedforward(FuelConstants.kShooterFeedForwardStatic,
       FuelConstants.kShooterFeedForwardVelocity);
   PIDController shooterController = new PIDController(FuelConstants.kShooterP, FuelConstants.kShooterI,
       FuelConstants.kShooterD);
   private double m_dashboardShooterRPS;
+
+  public static final InterpolatingDoubleTreeMap distanceToRPS = new InterpolatingDoubleTreeMap();
+
+  static {
+    // distanceToRPS.put(1.0, 70.0); //placeholder
+
+    distanceToRPS.put(Inches.of(100).in(Meters), 60.0); // 60 RPS to launch ball 100 inches in meters from hub
+    distanceToRPS.put(Feet.of(9.5).in(Meters), 72.0); // roughly 72 RPS (Max) to go 9.5 feet
+  }
 
   public FuelSubsystem() {
     if (FuelConstants.k_isEnabled) {
@@ -102,7 +118,8 @@ public class FuelSubsystem extends SubsystemBase {
     }
   }
 
-  // The following code is what will set our speed, labubu, voltage, and our stop control.
+  // The following code is what will set our speed, labubu, voltage, and our stop
+  // control.
   public void set(double shooterSpeed, double intakeSpeed) {
     fuelShooterMotor.set(shooterSpeed);
 
@@ -113,7 +130,16 @@ public class FuelSubsystem extends SubsystemBase {
   }
 
   public Command smartShoot(DoubleSupplier distanceFunction) {
-    return null;
+    return run(
+        () -> {
+          double distance = distanceFunction.getAsDouble();
+          if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
+            double distanceRps = distanceToRPS.get(distance);
+            setShooterVelocity(distanceRps);
+          } else {
+            setShooterVelocity(0); // Not in between range we can shoot.
+          }
+        }).withName("Smart shoot");
   }
 
   public void stop() {
