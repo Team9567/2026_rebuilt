@@ -75,17 +75,19 @@ public final class Constants {
 
     public static final Translation2d kBlueHubCoord = new Translation2d(Inches.of(181.56).in(Meters),
         Inches.of(158.32).in(Meters));
-    public static final Translation2d kRedHubCoord = new Translation2d(Inches.of(650.12-181.56).in(Meters),
+    public static final Translation2d kRedHubCoord = new Translation2d(Inches.of(650.12 - 181.56).in(Meters),
         Inches.of(158.32).in(Meters));
   }
+
   public static class FuelHerderConstants {
+    public static final boolean kIsEnabled = true;
     public static int kLeftHerderMotor = 7;
     public static int kRightHerderMotor = 8;
     public static final double kPositionConversionFactor = 0;
     public static final double kMotorRampTime = 0.1;
-    public static final double kLeftForwardSoftLimit = 5.2; //needs different number
+    public static final double kLeftForwardSoftLimit = 5.2; // needs different number
     public static final double kReverseSoftLimit = 0;
-    public static final double kRightForwardSoftLimit = 5.2; //needs different number
+    public static final double kRightForwardSoftLimit = 5.2; // needs different number
     public static final double kRetractArmSpeed = -0.1;
     public static final double kExtendArmSpeed = 0.1;
     public static final double kRightCurrentThreshold = 1;
@@ -105,7 +107,7 @@ public final class Constants {
     public static final int kIntakeMotorCurrentLimit = 60;
 
     public static final double kShooterFeedForwardStatic = 0.395;
-    public static final double kShooterFeedForwardVelocity = 1/7.8; // 1/6.462
+    public static final double kShooterFeedForwardVelocity = 1 / 7.8; // 1/6.462
     public static final double kShooterFeedForwardAccel = 0;
     public static final double kMaxAcceleration = 10;
     public static final double kProfileErrorRPS = 80;
@@ -113,8 +115,8 @@ public final class Constants {
     public static final double kShooterI = 0;
     public static final double kShooterD = 0.025;
 
-    public static final double kIntakeIntakeMotorSpeed = -1.0; 
-    public static final double kIntakeShooterMotorSpeed = 0.30; 
+    public static final double kIntakeIntakeMotorSpeed = -1.0;
+    public static final double kIntakeShooterMotorSpeed = 0.30;
     public static final double kEjectIntakeMotorSpeed = 1.0;
     public static final double kEjectShooterMotorSpeed = -0.30;
     public static final double kSpinupIntakeMotorSpeed = 0;
