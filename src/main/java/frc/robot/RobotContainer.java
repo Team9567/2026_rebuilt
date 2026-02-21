@@ -119,8 +119,8 @@ public class RobotContainer {
 
     m_climberSubsystem.setZSupplier(getGyroZValue);
 
-
-    m_controllerController.button(OperatorConstants.kDriverControllerBack).whileTrue(m_fuelSubsystem.smartShootTestCommand(5.0));
+    m_controllerController.button(OperatorConstants.kDriverControllerBack)
+        .whileTrue(m_fuelSubsystem.smartShoot(() -> m_drivetrainSubsystem.getDistanceToHub()));
   }
 
   /**

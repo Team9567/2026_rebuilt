@@ -41,10 +41,10 @@ public class FuelSubsystem extends SubsystemBase {
   public static final InterpolatingDoubleTreeMap distanceToRPS = new InterpolatingDoubleTreeMap();
 
   static {
-    //distanceToRPS.put(1.0, 70.0); //placeholder
+    // distanceToRPS.put(1.0, 70.0); //placeholder
 
-    distanceToRPS.put(Inches.of(100).in(Meters), 60.0); //60 RPS to launch ball 100 inches in meters from hub
-    distanceToRPS.put(Feet.of(9.5).in(Meters), 72.0); //roughly 72 RPS (Max) to go 9.5 feet
+    distanceToRPS.put(Inches.of(100).in(Meters), 60.0); // 60 RPS to launch ball 100 inches in meters from hub
+    distanceToRPS.put(Feet.of(9.5).in(Meters), 72.0); // roughly 72 RPS (Max) to go 9.5 feet
   }
 
   public FuelSubsystem() {
@@ -118,7 +118,8 @@ public class FuelSubsystem extends SubsystemBase {
     }
   }
 
-  // The following code is what will set our speed, labubu, voltage, and our stop control.
+  // The following code is what will set our speed, labubu, voltage, and our stop
+  // control.
   public void set(double shooterSpeed, double intakeSpeed) {
     fuelShooterMotor.set(shooterSpeed);
 
@@ -127,32 +128,19 @@ public class FuelSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("fuel/intakespeed", shooterSpeed);
     SmartDashboard.putNumber("fuel/shooterspeed", intakeSpeed);
   }
-  
+
   public Command smartShoot(DoubleSupplier distanceFunction) {
-    return  Commands.run(
-      () -> {
-        double distance = distanceFunction.getAsDouble();
-        if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
-          double distanceRps = distanceToRPS.get(distance);
-          setShooterVelocity(distanceRps);
-        } else {
-          setShooterVelocity(0); //Not in between range we can shoot.
-        }
-      }, this).withName("Smart shoot");
+    return run(
+        () -> {
+          double distance = distanceFunction.getAsDouble();
+          if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
+            double distanceRps = distanceToRPS.get(distance);
+            setShooterVelocity(distanceRps);
+          } else {
+            setShooterVelocity(0); // Not in between range we can shoot.
+          }
+        }).withName("Smart shoot");
   }
-
-    public Command smartShootTestCommand(Double distanceMeters) {
-    return  Commands.run(
-      () -> {
-        if (distanceMeters < FuelConstants.kMaxDistanceFromHub && distanceMeters > FuelConstants.kMinDistanceFromHub) {
-          double distanceRps = distanceToRPS.get(distanceMeters);
-          setShooterVelocity(distanceRps);
-        } else {
-          setShooterVelocity(0); //Not in between range we can shoot.
-        }
-      }, this).withName("Smart shoot test");
-  }
-
 
   public void stop() {
     fuelShooterMotor.set(0);
