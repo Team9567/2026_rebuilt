@@ -96,6 +96,7 @@ public final class Constants {
 
   public static class FuelConstants {
     public static final boolean k_isEnabled = true;
+    public static final double kRpsPerVolt = 6.462; //One volt gives ~6.462 RPS
     public static final int kShooterMotorID = 5;
     public static final double kShooterGearRatio = 0.5;
     public static final double kShooterMotorVoltageCompens = 10;
@@ -112,6 +113,7 @@ public final class Constants {
     public static final double kShooterFeedForwardStatic = 0.395;
     public static final double kShooterFeedForwardVelocity = 1 / 7.8; // 1/6.462
     public static final double kShooterFeedForwardAccel = 0;
+
     public static final double kMaxAcceleration = 10;
     public static final double kProfileErrorRPS = 80;
     public static final double kShooterP = 0.02;

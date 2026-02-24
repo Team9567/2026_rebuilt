@@ -7,7 +7,6 @@ import com.revrobotics.spark.SparkBase.ControlType;
 
 import static edu.wpi.first.units.Units.Feet;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.InchesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
 
 import java.util.function.DoubleSupplier;
@@ -19,7 +18,6 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -31,7 +29,6 @@ import frc.robot.Constants.FuelConstants;
 public class FuelSubsystem extends SubsystemBase {
   private SparkMax fuelShooterMotor;
   private SparkMax fuelIntakeMotor;
-  private final DrivetrainSubsystem m_DrivetrainSubsystem = new DrivetrainSubsystem();
   SimpleMotorFeedforward shooterFeedforward = new SimpleMotorFeedforward(FuelConstants.kShooterFeedForwardStatic,
       FuelConstants.kShooterFeedForwardVelocity);
   PIDController shooterController = new PIDController(FuelConstants.kShooterP, FuelConstants.kShooterI,
@@ -78,7 +75,7 @@ public class FuelSubsystem extends SubsystemBase {
           .d(FuelConstants.kShooterD)
 
               .maxMotion
-          .cruiseVelocity(0)
+          .cruiseVelocity(0) //Why 0?
           .maxAcceleration(FuelConstants.kMaxAcceleration)
           .allowedProfileError(FuelConstants.kProfileErrorRPS);
 
@@ -125,9 +122,14 @@ public class FuelSubsystem extends SubsystemBase {
 
     fuelIntakeMotor.set(intakeSpeed);
 
-    SmartDashboard.putNumber("fuel/intakespeed", shooterSpeed);
-    SmartDashboard.putNumber("fuel/shooterspeed", intakeSpeed);
+    SmartDashboard.putNumber("fuel/intakespeed", intakeSpeed);
+    SmartDashboard.putNumber("fuel/shooterspeed", shooterSpeed);
   }
+
+  public double getRPSFromVoltage(double desiredRPS) {
+    return desiredRPS * FuelConstants.kRpsPerVolt;
+  }
+
 
   public Command smartShoot(DoubleSupplier distanceFunction) {
     return run(
@@ -152,8 +154,8 @@ public class FuelSubsystem extends SubsystemBase {
 
     fuelIntakeMotor.setVoltage(intakeVoltage);
 
-    SmartDashboard.putNumber("fuel/intakevoltage", shooterVoltage);
-    SmartDashboard.putNumber("fuel/shootervoltage", intakeVoltage);
+    SmartDashboard.putNumber("fuel/intakevoltage", intakeVoltage);
+    SmartDashboard.putNumber("fuel/shootervoltage", shooterVoltage);
   }
 
   public Command setCommand(double shooterSpeed, double intakeSpeed) {
