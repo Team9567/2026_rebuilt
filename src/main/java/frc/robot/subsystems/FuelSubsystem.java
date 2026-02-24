@@ -126,11 +126,6 @@ public class FuelSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("fuel/shooterspeed", shooterSpeed);
   }
 
-  public double getRPSFromVoltage(double desiredRPS) {
-    return desiredRPS * FuelConstants.kRpsPerVolt;
-  }
-
-
   public Command smartShoot(DoubleSupplier distanceFunction) {
     return run(
         () -> {
