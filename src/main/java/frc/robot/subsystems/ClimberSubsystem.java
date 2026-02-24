@@ -9,10 +9,10 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.util.Units;
@@ -22,15 +22,15 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 /**
- * Elevator subsystem using SparkFlex with Vortex motor
+ * Elevator subsystem using SparkMax with Vortex motor
  */
 @Logged(name = "ClimberSubsystem")
 public class ClimberSubsystem extends SubsystemBase {
 
   // Constants
-  private static boolean kIsEnabled = false;
-  private final int canID = 29; // placeholder
-  private final double gearRatio = 0;
+  private static boolean kIsEnabled = true;
+  private final int canID = 9; // placeholder
+  private final double gearRatio = 56.0 / 45.0;
   private final double kP = 0; // placeholder
   private final double kI = 0;
   private final double kD = 0;
@@ -49,11 +49,14 @@ public class ClimberSubsystem extends SubsystemBase {
   private final double maxClimbHeightMeters = Units.inchesToMeters(28.5); // How high the climber is at its peak (not
                                                                           // over limit)
   private final double minClimbHeightMeters = Units.inchesToMeters(24);
-  private final double kHomingAmpsThresh = 5;
+  private final double kHomingAmpsThresh = 20;
   private final double climberOffsetMeters = 0.15; // placeholder
 
+  private double m_ampStorage[] = { 0, 0, 0, 0 };
+  private int m_indexAmps = 0;
+
   // Motor controller
-  private SparkFlex motor;
+  private SparkMax motor;
   private RelativeEncoder encoder;
   private SparkClosedLoopController sparkPidController;
   private DoubleSupplier m_zSupplier;
@@ -66,8 +69,8 @@ public class ClimberSubsystem extends SubsystemBase {
   public ClimberSubsystem() {
     if (kIsEnabled) {
       // Initialize motor controller
-      SparkFlexConfig motorConfig = new SparkFlexConfig();
-      motor = new SparkFlex(canID, MotorType.kBrushless);
+      SparkMaxConfig motorConfig = new SparkMaxConfig();
+      motor = new SparkMax(canID, MotorType.kBrushless);
       motorConfig.idleMode(brakeMode ? IdleMode.kBrake : IdleMode.kCoast);
 
       // Configure encoder
@@ -78,6 +81,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
       // Set current limits
       motorConfig.smartCurrentLimit(statorCurrentLimit);
+      // motorConfig.inverted(true);
 
       // Configure Feedback and Feedforward
       sparkPidController = motor.getClosedLoopController();
@@ -103,7 +107,7 @@ public class ClimberSubsystem extends SubsystemBase {
           ResetMode.kResetSafeParameters,
           PersistMode.kPersistParameters);
     }
-    
+
     setDefaultCommand(stopCommand());
   }
 
@@ -111,8 +115,21 @@ public class ClimberSubsystem extends SubsystemBase {
     m_zSupplier = supplier;
   }
 
+  @SuppressWarnings("unused")
   private double getZAxis() {
     return m_zSupplier.getAsDouble();
+  }
+
+  public Command moveUp() {
+    return run(() -> {
+      motor.set(0.25);
+    });
+  }
+
+  public Command moveDown() {
+    return run(() -> {
+      motor.set(-0.25);
+    });
   }
 
   /**
@@ -122,12 +139,15 @@ public class ClimberSubsystem extends SubsystemBase {
   public void periodic() {
     SmartDashboard.putNumber("Climber/Encoder position", motor.getEncoder().getPosition());
     SmartDashboard.putNumber("Climber Output Current", motor.getOutputCurrent());
+    SmartDashboard.putBoolean("Is Homed", this.m_isHomed);
 
-    if (this.getCurrentCommand() == this.getDefaultCommand()) {
-      SmartDashboard.putString("Climber - Current Command", "Idle?");
-    } else {
-      String cClimberCommandName = this.getCurrentCommand().getName();
-      SmartDashboard.putString("Climber - Current Command", cClimberCommandName);
+    if (this.getCurrentCommand() != null) {
+      if (this.getCurrentCommand() == this.getDefaultCommand()) {
+        SmartDashboard.putString("Climber - Current Command", "Idle?");
+      } else {
+        String cClimberCommandName = this.getCurrentCommand().getName();
+        SmartDashboard.putString("Climber - Current Command", cClimberCommandName);
+      }
     }
   }
 
@@ -302,18 +322,27 @@ public class ClimberSubsystem extends SubsystemBase {
     return Commands.none();
   }
 
+  public boolean hasReachedHardstop() {
+    double currentAverage = (m_ampStorage[0] + m_ampStorage[1] + m_ampStorage[2] + m_ampStorage[3]) / 4;
+
+    return currentAverage > kHomingAmpsThresh;
+  }
+
   public Command homeCommand() {
     return run(() -> {
-      double currentAmps = motor.getOutputCurrent();
-      if (currentAmps > kHomingAmpsThresh) {
-        setVoltage(0);
-        encoder.setPosition(0);
-        m_isHomed = true;
-        SparkFlexConfig config = new SparkFlexConfig();
-        config.softLimit.reverseSoftLimitEnabled(true);
-        motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-      } else {
-        motor.set(-0.1);
+      if (!m_isHomed) {
+        double currentAmps = motor.getOutputCurrent();
+        m_ampStorage[m_indexAmps++ % m_ampStorage.length] = currentAmps;
+        if (hasReachedHardstop()) {
+          setVoltage(0);
+          encoder.setPosition(0);
+          m_isHomed = true;
+          SparkMaxConfig config = new SparkMaxConfig();
+          config.softLimit.reverseSoftLimitEnabled(true);
+          motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        } else {
+          motor.set(-0.15);
+        }
       }
     }).withName("Home Command");
   }
@@ -353,7 +382,7 @@ public class ClimberSubsystem extends SubsystemBase {
   }
 
   /**
-   * Creates a command to move the elevator at a specific velocity.
+   * *
    * 
    * @param velocityMetersPerSecond The target velocity in meters per second
    * @return A command that moves the elevator at the specified velocity

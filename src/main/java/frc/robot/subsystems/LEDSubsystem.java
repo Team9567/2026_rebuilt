@@ -40,7 +40,7 @@ public class LEDSubsystem extends SubsystemBase {
             System.err.println("Failed to set alliance color: " + e.getMessage());
         }
     }
-
+    
     public void setEnabled() {
         try {
             wled.sendString("{\"on\":true,\"bri\":255}\n");

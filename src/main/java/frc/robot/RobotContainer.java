@@ -22,8 +22,6 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.FuelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
@@ -108,16 +106,20 @@ public class RobotContainer {
         .whileTrue(m_fuelSubsystem.ejectCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerX)
         .whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
+
     m_controllerController.button(OperatorConstants.kDriverControllerStart).onTrue(m_climberSubsystem.homeCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerY).onTrue(m_climberSubsystem.startClimbCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerB).onTrue(m_climberSubsystem.hangCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerA).onTrue(m_climberSubsystem.climbCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.moveUp());
+    m_controllerController.button(OperatorConstants.kDriverControllerA).whileTrue(m_climberSubsystem.moveDown());
 
     DoubleSupplier getGyroZValue = () -> {
       return m_drivetrainSubsystem.getGyroZValue();
     };
 
     m_climberSubsystem.setZSupplier(getGyroZValue);
+
+    m_controllerController.button(OperatorConstants.kDriverControllerBack)
+        .whileTrue(m_fuelSubsystem.smartShoot(() -> m_drivetrainSubsystem.getDistanceToHub()));
   }
 
   /**
