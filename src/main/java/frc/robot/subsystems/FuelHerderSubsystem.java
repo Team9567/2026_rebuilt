@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -15,19 +17,22 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import frc.robot.Constants.FuelHerderConstants;
 
 public class FuelHerderSubsystem extends SubsystemBase {
-    SparkMax leftherderMotor = new SparkMax(FuelHerderConstants.kLeftHerderMotor, MotorType.kBrushless);
-    SparkMax rightherderMotor = new SparkMax(FuelHerderConstants.kRightHerderMotor, MotorType.kBrushless);
+    SparkMax leftherderMotor;
+    SparkMax rightherderMotor;
+    PIDController leftpid = new PIDController(0.5, 0, 0);
+    PIDController rightpid = new PIDController(0.5, 0, 0);
     boolean isHomed = false;
 
     public FuelHerderSubsystem() {
         if (FuelHerderConstants.kIsEnabled) {
+            leftherderMotor = new SparkMax(FuelHerderConstants.kLeftHerderMotor, MotorType.kBrushless);
+            rightherderMotor = new SparkMax(FuelHerderConstants.kRightHerderMotor, MotorType.kBrushless);
             SparkMaxConfig config = new SparkMaxConfig();
             config
                     .idleMode(IdleMode.kBrake)
                     .smartCurrentLimit(20);
 
             config.openLoopRampRate(FuelHerderConstants.kMotorRampTime);
-            config.encoder.positionConversionFactor(FuelHerderConstants.kPositionConversionFactor);
             config.inverted(false);
             config.softLimit
                     .forwardSoftLimit(FuelHerderConstants.kLeftForwardSoftLimit)
@@ -35,6 +40,7 @@ public class FuelHerderSubsystem extends SubsystemBase {
                     .forwardSoftLimitEnabled(false)
                     .reverseSoftLimitEnabled(false);
             leftherderMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
             config.inverted(true);
             config.softLimit
                     .forwardSoftLimit(FuelHerderConstants.kRightForwardSoftLimit)
@@ -43,16 +49,16 @@ public class FuelHerderSubsystem extends SubsystemBase {
                     .reverseSoftLimitEnabled(false);
             rightherderMotor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-            setDefaultCommand(retractArms());
+            setDefaultCommand(homeArms());
         }
 
     }
 
-    public Command retractArms() {
+    public Command homeArms() {
         if (FuelHerderConstants.kIsEnabled) {
             return run(() -> {
-                setLeft(FuelHerderConstants.kRetractArmSpeed);
-                setRight(FuelHerderConstants.kRetractArmSpeed);
+                setLeft(FuelHerderConstants.kHomeArmSpeed);
+                setRight(FuelHerderConstants.kHomeArmSpeed);
             });
         } else {
             return Commands.none();
@@ -61,15 +67,32 @@ public class FuelHerderSubsystem extends SubsystemBase {
     }
 
     public Command extendArms() {
+        return armPid(FuelHerderConstants.kLeftForwardSoftLimit, FuelHerderConstants.kRightForwardSoftLimit);
+    }
+    public Command retractArms() {
+        return armPid(0, 0);
+    }
+
+    public Command armPid(double leftTarget, double rightTarget) {
         if (FuelHerderConstants.kIsEnabled) {
-            return run(() -> {
-                setLeft(FuelHerderConstants.kExtendArmSpeed);
-                setRight(FuelHerderConstants.kExtendArmSpeed);
+            return startRun(() -> {
+                leftpid.reset();
+                rightpid.reset();
+
+            }, () -> {
+                double leftPos = leftherderMotor.getEncoder().getPosition();
+                double rightPos = rightherderMotor.getEncoder().getPosition();
+                double leftSpeed = leftpid.calculate(leftPos, leftTarget);
+                double rightSpeed = rightpid.calculate(rightPos, rightTarget);
+                // speed = MathUtil.clamp(speed, -0.25, 0.25);
+                setLeft(leftSpeed);
+                setRight(rightSpeed);
+            }).until(() -> {
+                return leftpid.atSetpoint() && rightpid.atSetpoint();
             });
         } else {
             return Commands.none();
         }
-
     }
 
     public void setLeft(double speed) {
@@ -88,6 +111,11 @@ public class FuelHerderSubsystem extends SubsystemBase {
     public void periodic() {
         // This method will be called once per scheduler run
         if (FuelHerderConstants.kIsEnabled) {
+            SmartDashboard.putBoolean("FuelHerder/homed", isHomed);
+            SmartDashboard.putNumber("FuelHerder/rightdistance", rightherderMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("FuelHerder/leftdistance", leftherderMotor.getEncoder().getPosition());
+            SmartDashboard.putNumber("FuelHerder/rightcurrent", rightherderMotor.getOutputCurrent());
+            SmartDashboard.putNumber("FuelHerder/leftcurrent", leftherderMotor.getOutputCurrent());
             if (!isHomed) {
                 // Homing
                 if (rightherderMotor.getOutputCurrent() > FuelHerderConstants.kRightCurrentThreshold
@@ -104,6 +132,7 @@ public class FuelHerderSubsystem extends SubsystemBase {
                             PersistMode.kNoPersistParameters);
                     rightherderMotor.configure(config, ResetMode.kNoResetSafeParameters,
                             PersistMode.kNoPersistParameters);
+                    setDefaultCommand(retractArms());
                     isHomed = true;
                 }
             }

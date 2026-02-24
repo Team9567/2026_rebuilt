@@ -18,6 +18,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.FuelHerderSubsystem;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 
 import java.util.function.DoubleSupplier;
@@ -45,6 +46,7 @@ public class RobotContainer {
   SendableChooser<Command> autochooser = new SendableChooser<>();
   private final FuelSubsystem m_fuelSubsystem = new FuelSubsystem();
   private final ClimberSubsystem m_climberSubsystem = new ClimberSubsystem();
+  private final FuelHerderSubsystem m_fuelHerder = new FuelHerderSubsystem();
 
   private final LEDSubsystem m_ledSubsystem = new LEDSubsystem();
 
@@ -112,6 +114,9 @@ public class RobotContainer {
     m_controllerController.button(OperatorConstants.kDriverControllerY).onTrue(m_climberSubsystem.startClimbCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerB).onTrue(m_climberSubsystem.hangCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerA).onTrue(m_climberSubsystem.climbCommand());
+
+    m_controllerController.button(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
+    m_controllerController.button(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
 
     DoubleSupplier getGyroZValue = () -> {
       return m_drivetrainSubsystem.getGyroZValue();
