@@ -85,13 +85,12 @@ public final class Constants {
     public static int kRightHerderMotor = 8;
     public static final double kPositionConversionFactor = 0;
     public static final double kMotorRampTime = 0.1;
-    public static final double kLeftForwardSoftLimit = 5.2; // needs different number
+    public static final double kLeftForwardSoftLimit = 3.7;
     public static final double kReverseSoftLimit = 0;
-    public static final double kRightForwardSoftLimit = 5.2; // needs different number
-    public static final double kRetractArmSpeed = -0.1;
-    public static final double kExtendArmSpeed = 0.1;
-    public static final double kRightCurrentThreshold = 1;
-    public static final double kLeftCurrentThreshold = 1;
+    public static final double kRightForwardSoftLimit = 3.8;
+    public static final double kHomeArmSpeed = -0.1;
+    public static final double kRightCurrentThreshold = 20;
+    public static final double kLeftCurrentThreshold = 20;
   }
 
   public static class FuelConstants {
