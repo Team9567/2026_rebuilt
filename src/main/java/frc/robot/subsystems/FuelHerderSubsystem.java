@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -19,8 +20,8 @@ import frc.robot.Constants.FuelHerderConstants;
 public class FuelHerderSubsystem extends SubsystemBase {
     SparkMax leftherderMotor;
     SparkMax rightherderMotor;
-    PIDController leftpid = new PIDController(0.5, 0, 0);
-    PIDController rightpid = new PIDController(0.5, 0, 0);
+    PIDController leftpid = new PIDController(0.25, 0, 0);
+    PIDController rightpid = new PIDController(0.25, 0, 0);
     boolean isHomed = false;
 
     public FuelHerderSubsystem() {
@@ -84,11 +85,18 @@ public class FuelHerderSubsystem extends SubsystemBase {
                 double rightPos = rightherderMotor.getEncoder().getPosition();
                 double leftSpeed = leftpid.calculate(leftPos, leftTarget);
                 double rightSpeed = rightpid.calculate(rightPos, rightTarget);
-                // speed = MathUtil.clamp(speed, -0.25, 0.25);
+
+                SmartDashboard.putNumber("FuelHerder/left speed", leftSpeed);
+                SmartDashboard.putNumber("FuelHerder/right speed", rightSpeed);
+                SmartDashboard.putNumber("FuelHerder/left position", leftPos);
+                SmartDashboard.putNumber("FuelHerder/right position", rightPos);
+                SmartDashboard.putNumber("FuelHerder/left position", leftTarget);
+                SmartDashboard.putNumber("FuelHerder/right position", rightTarget);
+                
+                rightSpeed = MathUtil.clamp(rightSpeed, -0.50, 0.50);
+                leftSpeed = MathUtil.clamp(leftSpeed, -0.50, 0.50);
                 setLeft(leftSpeed);
                 setRight(rightSpeed);
-            }).until(() -> {
-                return leftpid.atSetpoint() && rightpid.atSetpoint();
             });
         } else {
             return Commands.none();

@@ -111,7 +111,7 @@ public class FuelSubsystem extends SubsystemBase {
       // Pass in stop when needed to be stopped.
       setDefaultCommand(stopCommand());
 
-      SmartDashboard.putNumber("shooter/rps", 0);
+      SmartDashboard.putNumber("shooter/RpsIn", 0);
     }
   }
 
@@ -251,8 +251,13 @@ public class FuelSubsystem extends SubsystemBase {
     if (FuelConstants.k_isEnabled) {
       return run(() -> {
         setShooterVelocity(m_dashboardShooterRPS);
-        setIntakeVelocity(FuelConstants.kShootIntakeMotorSpeed);
-      });
+      }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 3) >= m_dashboardShooterRPS)
+      .andThen(
+        run(() -> {
+          setShooterVelocity(m_dashboardShooterRPS);
+          setIntakeVelocity(FuelConstants.kShootIntakeMotorSpeed);
+        })
+      );
     } else {
       return Commands.none();
     }
@@ -260,7 +265,7 @@ public class FuelSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_dashboardShooterRPS = SmartDashboard.getNumber("shooter/rps", 0);
-    SmartDashboard.putNumber("shooter/velocity", fuelShooterMotor.getEncoder().getVelocity());
+    m_dashboardShooterRPS = SmartDashboard.getNumber("shooter/RpsIn", 0);
+    SmartDashboard.putNumber("shooter/Rps", fuelShooterMotor.getEncoder().getVelocity());
   }
 }

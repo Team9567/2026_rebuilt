@@ -106,6 +106,7 @@ public class RobotContainer {
         .whileTrue(m_fuelSubsystem.intakeCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerRightBumper)
         .whileTrue(m_fuelSubsystem.ejectCommand());
+        
     m_controllerController.button(OperatorConstants.kDriverControllerX)
         .whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
 
@@ -114,8 +115,8 @@ public class RobotContainer {
     m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.moveUp());
     m_controllerController.button(OperatorConstants.kDriverControllerA).whileTrue(m_climberSubsystem.moveDown());
 
-    m_controllerController.button(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
-    m_controllerController.button(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
+    m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
+    m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
 
     DoubleSupplier getGyroZValue = () -> {
       return m_drivetrainSubsystem.getGyroZValue();

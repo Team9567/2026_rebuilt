@@ -7,6 +7,8 @@ package frc.robot;
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -80,7 +82,7 @@ public final class Constants {
   }
 
   public static class FuelHerderConstants {
-    public static final boolean kIsEnabled = true;
+    public static final boolean kIsEnabled = false;
     public static int kLeftHerderMotor = 7;
     public static int kRightHerderMotor = 8;
     public static final double kPositionConversionFactor = 0;
@@ -105,18 +107,19 @@ public final class Constants {
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
 
-    public static final double kMaxDistanceFromHub = 9.5;
-    public static final double kMinDistanceFromHub = 1.5;
+    public static final double kMaxDistanceFromHub = Units.feetToMeters(9.5);
+    public static final double kMinDistanceFromHub = Units.feetToMeters(1.5);
 
-    public static final double kShooterFeedForwardStatic = 0.395;
-    public static final double kShooterFeedForwardVelocity = 1 / 7.8; // 1/6.462
+    public static final double kShooterFeedForwardStatic = 0.25;
+    public static final double kShooterFeedForwardVelocity = 1 / 7.88; // 1/6.462
     public static final double kShooterFeedForwardAccel = 0;
 
     public static final double kMaxAcceleration = 10;
     public static final double kProfileErrorRPS = 80;
-    public static final double kShooterP = 0.02;
+    
+    public static final double kShooterP = kShooterFeedForwardVelocity * 0.25;
     public static final double kShooterI = 0;
-    public static final double kShooterD = 0.025;
+    public static final double kShooterD = kShooterP/4;
 
     public static final double kIntakeIntakeMotorSpeed = -1.0;
     public static final double kIntakeShooterMotorSpeed = 0.30;
