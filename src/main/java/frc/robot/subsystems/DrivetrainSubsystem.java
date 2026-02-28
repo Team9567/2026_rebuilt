@@ -63,12 +63,18 @@ public class DrivetrainSubsystem extends SubsystemBase {
     turnpid.setTolerance(1);
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
+
+    Rotation2d initialDirection = new Rotation2d(0);
+    var alliance = DriverStation.getAlliance();
+    if (!alliance.isEmpty() && alliance.get() != Alliance.Blue) {
+      initialDirection = new Rotation2d(180);
+    }
     odometry = new DifferentialDrivePoseEstimator(
         kinematics,
         m_gyro.getRotation2d(),
         getLeftEncoder(),
         getRightEncoder(),
-        new Pose2d(0, 0, new Rotation2d()));
+        new Pose2d(0, 0, initialDirection));
 
     SmartDashboard.putNumber("drivetrain/wheelconversion", DriveTrainConstants.kPositionConversionFactor);
 
@@ -201,7 +207,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
       boolean doRejectUpdate = false;
 
-      // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+      // if our angular velocity is greater than 360 degrees per second, ignore vision
+      // updates
       if (Math.abs(m_gyro.getRate()) > 360) {
         doRejectUpdate = true;
       }

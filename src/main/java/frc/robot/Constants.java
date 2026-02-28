@@ -1,6 +1,6 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// the WPILib BSD license file in the root directory of this project. Ares was here.
 
 package frc.robot;
 
@@ -107,7 +107,7 @@ public final class Constants {
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
 
-    public static final double kMaxDistanceFromHub = Units.feetToMeters(9.5);
+    public static final double kMaxDistanceFromHub = Units.feetToMeters(15);
     public static final double kMinDistanceFromHub = Units.feetToMeters(1.5);
 
     public static final double kShooterFeedForwardStatic = 0.25;
