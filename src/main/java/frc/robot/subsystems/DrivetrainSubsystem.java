@@ -64,10 +64,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
 
-    Rotation2d initialDirection = new Rotation2d(0);
+    Rotation2d initialDirection = new Rotation2d(Math.PI);
     var alliance = DriverStation.getAlliance();
     if (!alliance.isEmpty() && alliance.get() != Alliance.Blue) {
-      initialDirection = new Rotation2d(180);
+      initialDirection = new Rotation2d(0);
     }
     odometry = new DifferentialDrivePoseEstimator(
         kinematics,
@@ -196,6 +196,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // updates odometry
+
     odometry.update(m_gyro.getRotation2d(), new DifferentialDriveWheelPositions(getLeftEncoder(), getRightEncoder()));
     if (DriveTrainConstants.kIsEnabled) {
       // updates position based on visible april tags
@@ -204,6 +205,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
           0, 0, 0, 0, 0);
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
           .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
+
+      SmartDashboard.putNumber("drivetrain/degrees", odometry.getEstimatedPosition().getRotation().getDegrees());
 
       boolean doRejectUpdate = false;
 
@@ -226,6 +229,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // sets robot's positon on field based on gyro and limelight
     Pose2d bot = odometry.getEstimatedPosition();
     field.setRobotPose(bot);
+    SmartDashboard.putData("field", field);
   }
 
   @Override

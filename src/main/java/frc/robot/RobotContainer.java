@@ -38,7 +38,7 @@ import frc.robot.subsystems.LEDSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
-  SlewRateLimiter linearRateLimiter = new SlewRateLimiter(1.0);
+  SlewRateLimiter linearRateLimiter = new SlewRateLimiter(1.5);
   SlewRateLimiter turnRateLimiter = new SlewRateLimiter(0.8);
 
   SendableChooser<Command> autochooser = new SendableChooser<>();
@@ -99,7 +99,7 @@ public class RobotContainer {
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90)
-        .whileTrue(m_fuelSubsystem.shootVelocityCommand(60));
+        .whileTrue(m_fuelSubsystem.shootVelocityCommand(60)); // estimated distance to score in hub: 
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80)
         .whileTrue(m_fuelSubsystem.spinupCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper)

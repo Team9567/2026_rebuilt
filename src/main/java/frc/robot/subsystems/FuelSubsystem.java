@@ -89,7 +89,7 @@ public class FuelSubsystem extends SubsystemBase {
 
       /**
        * Create and apply configuration for intake motor. Voltage compensation helps
-       * the intake behave the same as the battery
+       * the intake behave the same as the battery - jett was here
        * voltage dips. The current limit helps prevent breaker trips or burning out
        * the motor in the event the intake stalls.
        */
