@@ -148,7 +148,7 @@ public class FuelSubsystem extends SubsystemBase {
             setIntakeVelocity(distanceRps);
           } else {
             setIntakeVelocity(0); // Not in between range we can shoot.
-        }}));
+        }})).withName("smart shoot");
   }
 
   public void stop() {
@@ -192,7 +192,7 @@ public class FuelSubsystem extends SubsystemBase {
       return Commands.run(
           () -> {
             stop();
-          }, this);
+          }, this).withName("stop");
     } else {
       return Commands.none();
     }
@@ -279,5 +279,13 @@ public class FuelSubsystem extends SubsystemBase {
   public void periodic() {
     m_dashboardShooterRPS = SmartDashboard.getNumber("shooter/RpsIn", 0);
     SmartDashboard.putNumber("shooter/Rps", fuelShooterMotor.getEncoder().getVelocity());
+    if (this.getCurrentCommand() != null) {
+      if (this.getCurrentCommand() == this.getDefaultCommand()) {
+        SmartDashboard.putString("shooter/CurrentCommand", "Idle?");
+      } else {
+        String shooterCommandName = this.getCurrentCommand().getName();
+        SmartDashboard.putString("shooter/CurrentCommand", shooterCommandName);
+      }
+    }
   }
 }

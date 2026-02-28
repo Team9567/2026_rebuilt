@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -16,13 +19,11 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
+import frc.robot.commands.Autos.Closeness;
+import frc.robot.commands.Autos.Handed;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.FuelHerderSubsystem;
-import edu.wpi.first.math.filter.SlewRateLimiter;
-
-import java.util.function.DoubleSupplier;
-
 import frc.robot.subsystems.FuelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 
@@ -39,9 +40,12 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
   SlewRateLimiter linearRateLimiter = new SlewRateLimiter(1.5);
-  SlewRateLimiter turnRateLimiter = new SlewRateLimiter(0.8);
+  SlewRateLimiter turnRateLimiter = new SlewRateLimiter(1.2);
 
-  SendableChooser<Command> autochooser = new SendableChooser<>();
+  SendableChooser<Command> autochooser1 = new SendableChooser<>();
+  SendableChooser<Command> autochooser2 = new SendableChooser<>();
+  SendableChooser<Handed> climbHandChooser = new SendableChooser<>();
+  SendableChooser<Closeness> climbCloseChooser = new SendableChooser<>();
   private final FuelSubsystem m_fuelSubsystem = new FuelSubsystem();
   private final ClimberSubsystem m_climberSubsystem = new ClimberSubsystem();
   private final FuelHerderSubsystem m_fuelHerder = new FuelHerderSubsystem();
@@ -59,9 +63,21 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
     configureBindings();
-    autochooser.addOption("nothing", Commands.none());
-    autochooser.addOption("exampleAuto", Autos.exampleAuto(m_drivetrainSubsystem));
-    SmartDashboard.putData("AutoChooser", autochooser);
+    climbHandChooser.addOption("left", Handed.Left);
+    climbHandChooser.addOption("right", Handed.Right);
+    climbCloseChooser.addOption("near", Closeness.Near);
+    climbCloseChooser.addOption("far", Closeness.Far);
+    autochooser1.addOption("Just Shoot", Autos.justShoot(m_fuelSubsystem));
+    autochooser1.addOption("Smart Shoot", Autos.smartShoot(m_fuelSubsystem, m_drivetrainSubsystem));
+    autochooser1.addOption("Smart Climb", Autos.smartClimb(m_climberSubsystem, m_drivetrainSubsystem,
+        climbHandChooser.getSelected(), climbCloseChooser.getSelected()));
+    autochooser2.addOption("nothing", Commands.none());
+    autochooser2.addOption("Smart Climb", Autos.smartClimb(m_climberSubsystem, m_drivetrainSubsystem,
+        climbHandChooser.getSelected(), climbCloseChooser.getSelected()));
+    SmartDashboard.putData("AutoChooser1", autochooser1);
+    SmartDashboard.putData("AutoChooser2", autochooser2);
+    SmartDashboard.putData("climb distance", climbCloseChooser);
+    SmartDashboard.putData("climb handed", climbHandChooser);
   }
 
   /**
@@ -91,7 +107,7 @@ public class RobotContainer {
       m_drivetrainSubsystem.arcadeDrive(
           linearRateLimiter.calculate(-m_driverController.getRawAxis(OperatorConstants.kControllerLeftVertical)),
           turnRateLimiter.calculate(-m_driverController.getRawAxis(OperatorConstants.kControllerRightHorizontal)));
-    }, m_drivetrainSubsystem));
+    }, m_drivetrainSubsystem).withName("default command"));
 
     Trigger lowGear = m_driverController.button(OperatorConstants.kDriverControllerY);
     lowGear.onTrue(new InstantCommand(m_ledSubsystem::setLowGear, m_ledSubsystem))
@@ -99,14 +115,14 @@ public class RobotContainer {
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90)
-        .whileTrue(m_fuelSubsystem.shootVelocityCommand(60)); // estimated distance to score in hub: 
+        .whileTrue(m_fuelSubsystem.shootVelocityCommand(60)); // estimated distance to score in hub:
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80)
         .whileTrue(m_fuelSubsystem.spinupCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper)
         .whileTrue(m_fuelSubsystem.intakeCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerRightBumper)
         .whileTrue(m_fuelSubsystem.ejectCommand());
-        
+
     m_controllerController.button(OperatorConstants.kDriverControllerX)
         .whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
 
@@ -134,7 +150,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    return Autos.exampleAuto(m_drivetrainSubsystem);
+    return Commands.runOnce(() -> SmartDashboard.putString("Auto Stage", "before auto 1"))
+        .andThen(autochooser1.getSelected())
+        .andThen(() -> SmartDashboard.putString("Auto Stage", "after auto 1"))
+        .andThen(autochooser2.getSelected())
+        .andThen(() -> SmartDashboard.putString("Auto Stage", "after auto 2"));
   }
 }

@@ -9,6 +9,7 @@ import com.studica.frc.AHRS.NavXComType;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 
+import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -70,6 +71,8 @@ public final class Constants {
     public static final double kTurnI = 0;
     public static final double kTurnD = 0.005;
 
+    public static final double kArmLength = Inches.of(10).in(Meters);
+
     public static final int kBlueHubBlueSideTagID = 26;
     public static final int kBlueHubRedSideTagID = 20;
     public static final int kRedHubRedSideTagID = 10;
@@ -79,10 +82,15 @@ public final class Constants {
         Inches.of(158.32).in(Meters));
     public static final Translation2d kRedHubCoord = new Translation2d(Inches.of(650.12 - 181.56).in(Meters),
         Inches.of(158.32).in(Meters));
+
+    public static final Translation2d kBlueTowerCoord = new Translation2d(Inches.of(45).in(Meters),
+        Inches.of(158.84 - 11.38).in(Meters));
+    public static final Translation2d kRedTowerCoord = new Translation2d(Inches.of(651.22 - 45).in(Meters),
+        Inches.of(158.84 + 11.38).in(Meters));
   }
 
   public static class FuelHerderConstants {
-    public static final boolean kIsEnabled = false;
+    public static final boolean kIsEnabled = true;
     public static int kLeftHerderMotor = 7;
     public static int kRightHerderMotor = 8;
     public static final double kPositionConversionFactor = 0;
@@ -116,10 +124,10 @@ public final class Constants {
 
     public static final double kMaxAcceleration = 10;
     public static final double kProfileErrorRPS = 80;
-    
+
     public static final double kShooterP = kShooterFeedForwardVelocity * 0.25;
     public static final double kShooterI = 0;
-    public static final double kShooterD = kShooterP/4;
+    public static final double kShooterD = kShooterP / 4;
 
     public static final double kIntakeIntakeMotorSpeed = -1.0;
     public static final double kIntakeShooterMotorSpeed = 0.30;
