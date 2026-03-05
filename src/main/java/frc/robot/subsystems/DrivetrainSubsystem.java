@@ -63,7 +63,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
     turnpid.setTolerance(1);
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
-
+    m_gyro.zeroYaw();
+    while (m_gyro.isCalibrating()) {
+      ;
+    }
     Rotation2d initialDirection = new Rotation2d(Math.PI);
     var alliance = DriverStation.getAlliance();
     if (!alliance.isEmpty() && alliance.get() != Alliance.Blue) {
@@ -75,7 +78,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         getLeftEncoder(),
         getRightEncoder(),
         new Pose2d(0, 0, initialDirection));
-
+odometry.resetRotation(initialDirection);
     SmartDashboard.putNumber("drivetrain/wheelconversion", DriveTrainConstants.kPositionConversionFactor);
 
     for (SparkFlex motor : new SparkFlex[] {
@@ -207,6 +210,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
           .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
 
       SmartDashboard.putNumber("drivetrain/degrees", odometry.getEstimatedPosition().getRotation().getDegrees());
+      SmartDashboard.putNumber("drivetrain/gyroDegrees", m_gyro.getRotation2d().getDegrees());
+      SmartDashboard.putNumber("drivetrain/gyroDegreesDirect", m_gyro.getAngle());
 
       boolean doRejectUpdate = false;
 
@@ -230,6 +235,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
     Pose2d bot = odometry.getEstimatedPosition();
     field.setRobotPose(bot);
     SmartDashboard.putData("field", field);
+    if (this.getCurrentCommand() != null) {
+
+      String driveCommandName = this.getCurrentCommand().getName();
+      SmartDashboard.putString("drivetrain/CurrentCommand", driveCommandName);
+
+    }
   }
 
   @Override

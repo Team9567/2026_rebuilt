@@ -6,6 +6,9 @@ package frc.robot;
 
 import java.util.function.DoubleSupplier;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -105,7 +108,7 @@ public class RobotContainer {
 
     m_drivetrainSubsystem.setDefaultCommand(new RunCommand(() -> {
       m_drivetrainSubsystem.arcadeDrive(
-          linearRateLimiter.calculate(-m_driverController.getRawAxis(OperatorConstants.kControllerLeftVertical)),
+          linearRateLimiter.calculate(m_driverController.getRawAxis(OperatorConstants.kControllerLeftVertical)),
           turnRateLimiter.calculate(-m_driverController.getRawAxis(OperatorConstants.kControllerRightHorizontal)));
     }, m_drivetrainSubsystem).withName("default command"));
 
@@ -114,10 +117,14 @@ public class RobotContainer {
         .onFalse(new InstantCommand(m_ledSubsystem::setHighGear, m_ledSubsystem));
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
+    // m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger,
+    // 0.90)
+    // .whileTrue(m_fuelSubsystem.shootVelocityCommand(60)); // estimated distance
+    // to score in hub:
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90)
-        .whileTrue(m_fuelSubsystem.shootVelocityCommand(60)); // estimated distance to score in hub:
+        .whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(117).in(Meters)));
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80)
-        .whileTrue(m_fuelSubsystem.spinupCommand());
+        .whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(54).in(Meters)));
     m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper)
         .whileTrue(m_fuelSubsystem.intakeCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerRightBumper)
