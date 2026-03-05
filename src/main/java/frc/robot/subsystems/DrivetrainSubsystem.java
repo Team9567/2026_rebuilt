@@ -63,13 +63,22 @@ public class DrivetrainSubsystem extends SubsystemBase {
     turnpid.setTolerance(1);
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
+    m_gyro.zeroYaw();
+    while (m_gyro.isCalibrating()) {
+      ;
+    }
+    Rotation2d initialDirection = new Rotation2d(Math.PI);
+    var alliance = DriverStation.getAlliance();
+    if (!alliance.isEmpty() && alliance.get() != Alliance.Blue) {
+      initialDirection = new Rotation2d(0);
+    }
     odometry = new DifferentialDrivePoseEstimator(
         kinematics,
         m_gyro.getRotation2d(),
         getLeftEncoder(),
         getRightEncoder(),
-        new Pose2d(0, 0, new Rotation2d()));
-
+        new Pose2d(0, 0, initialDirection));
+odometry.resetRotation(initialDirection);
     SmartDashboard.putNumber("drivetrain/wheelconversion", DriveTrainConstants.kPositionConversionFactor);
 
     for (SparkFlex motor : new SparkFlex[] {
@@ -190,6 +199,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // updates odometry
+
     odometry.update(m_gyro.getRotation2d(), new DifferentialDriveWheelPositions(getLeftEncoder(), getRightEncoder()));
     if (DriveTrainConstants.kIsEnabled) {
       // updates position based on visible april tags
@@ -199,9 +209,14 @@ public class DrivetrainSubsystem extends SubsystemBase {
       LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
           .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
 
+      SmartDashboard.putNumber("drivetrain/degrees", odometry.getEstimatedPosition().getRotation().getDegrees());
+      SmartDashboard.putNumber("drivetrain/gyroDegrees", m_gyro.getRotation2d().getDegrees());
+      SmartDashboard.putNumber("drivetrain/gyroDegreesDirect", m_gyro.getAngle());
+
       boolean doRejectUpdate = false;
 
-      // if our angular velocity is greater than 360 degrees per second, ignore vision updates
+      // if our angular velocity is greater than 360 degrees per second, ignore vision
+      // updates
       if (Math.abs(m_gyro.getRate()) > 360) {
         doRejectUpdate = true;
       }
@@ -219,6 +234,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // sets robot's positon on field based on gyro and limelight
     Pose2d bot = odometry.getEstimatedPosition();
     field.setRobotPose(bot);
+    SmartDashboard.putData("field", field);
+    if (this.getCurrentCommand() != null) {
+
+      String driveCommandName = this.getCurrentCommand().getName();
+      SmartDashboard.putString("drivetrain/CurrentCommand", driveCommandName);
+
+    }
   }
 
   @Override

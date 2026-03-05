@@ -1,12 +1,15 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// the WPILib BSD license file in the root directory of this project. Ares was here.
 
 package frc.robot;
 
 import com.studica.frc.AHRS.NavXComType;
 
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+
+import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -68,6 +71,8 @@ public final class Constants {
     public static final double kTurnI = 0;
     public static final double kTurnD = 0.005;
 
+    public static final double kArmLength = Inches.of(10).in(Meters);
+
     public static final int kBlueHubBlueSideTagID = 26;
     public static final int kBlueHubRedSideTagID = 20;
     public static final int kRedHubRedSideTagID = 10;
@@ -77,6 +82,11 @@ public final class Constants {
         Inches.of(158.32).in(Meters));
     public static final Translation2d kRedHubCoord = new Translation2d(Inches.of(650.12 - 181.56).in(Meters),
         Inches.of(158.32).in(Meters));
+
+    public static final Translation2d kBlueTowerCoord = new Translation2d(Inches.of(45).in(Meters),
+        Inches.of(158.84 - 11.38).in(Meters));
+    public static final Translation2d kRedTowerCoord = new Translation2d(Inches.of(651.22 - 45).in(Meters),
+        Inches.of(158.84 + 11.38).in(Meters));
   }
 
   public static class FuelHerderConstants {
@@ -105,18 +115,19 @@ public final class Constants {
     public static final double kIntakeMotorVoltageCompens = 10;
     public static final int kIntakeMotorCurrentLimit = 60;
 
-    public static final double kMaxDistanceFromHub = 9.5;
-    public static final double kMinDistanceFromHub = 1.5;
+    public static final double kMaxDistanceFromHub = Units.feetToMeters(15);
+    public static final double kMinDistanceFromHub = Units.feetToMeters(1.5);
 
-    public static final double kShooterFeedForwardStatic = 0.395;
-    public static final double kShooterFeedForwardVelocity = 1 / 7.8; // 1/6.462
+    public static final double kShooterFeedForwardStatic = 0.25;
+    public static final double kShooterFeedForwardVelocity = 1 / 7.88; // 1/6.462
     public static final double kShooterFeedForwardAccel = 0;
 
     public static final double kMaxAcceleration = 10;
     public static final double kProfileErrorRPS = 80;
-    public static final double kShooterP = 0.02;
+
+    public static final double kShooterP = kShooterFeedForwardVelocity * 0.25;
     public static final double kShooterI = 0;
-    public static final double kShooterD = 0.025;
+    public static final double kShooterD = kShooterP / 4;
 
     public static final double kIntakeIntakeMotorSpeed = -1.0;
     public static final double kIntakeShooterMotorSpeed = 0.30;

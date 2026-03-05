@@ -38,10 +38,10 @@ public class FuelSubsystem extends SubsystemBase {
   public static final InterpolatingDoubleTreeMap distanceToRPS = new InterpolatingDoubleTreeMap();
 
   static {
-    // distanceToRPS.put(1.0, 70.0); //placeholder
-
-    distanceToRPS.put(Inches.of(100).in(Meters), 60.0); // 60 RPS to launch ball 100 inches in meters from hub
-    distanceToRPS.put(Feet.of(9.5).in(Meters), 72.0); // roughly 72 RPS (Max) to go 9.5 feet
+    distanceToRPS.put(Inches.of(54).in(Meters), 48.0); // 54 inches from hub at 48 RPS
+    distanceToRPS.put(Inches.of(84).in(Meters), 52.0); // 84 inches from hub at 52 RPS
+    distanceToRPS.put(Inches.of(117).in(Meters), 60.0); // 117 inches from hub at 60 RPS
+    distanceToRPS.put(Inches.of(179).in(Meters), 74.0); // 179 inches from hub at 74 RPS (Max)
   }
 
   public FuelSubsystem() {
@@ -89,7 +89,7 @@ public class FuelSubsystem extends SubsystemBase {
 
       /**
        * Create and apply configuration for intake motor. Voltage compensation helps
-       * the intake behave the same as the battery
+       * the intake behave the same as the battery - jett was here
        * voltage dips. The current limit helps prevent breaker trips or burning out
        * the motor in the event the intake stalls.
        */
@@ -111,7 +111,7 @@ public class FuelSubsystem extends SubsystemBase {
       // Pass in stop when needed to be stopped.
       setDefaultCommand(stopCommand());
 
-      SmartDashboard.putNumber("shooter/rps", 0);
+      SmartDashboard.putNumber("shooter/RpsIn", 0);
     }
   }
 
@@ -130,13 +130,25 @@ public class FuelSubsystem extends SubsystemBase {
     return run(
         () -> {
           double distance = distanceFunction.getAsDouble();
+          SmartDashboard.putNumber("fuel/hubdistance", distance);
           if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
             double distanceRps = distanceToRPS.get(distance);
+            SmartDashboard.putNumber("fuel/smartRPS", distanceRps);
             setShooterVelocity(distanceRps);
           } else {
             setShooterVelocity(0); // Not in between range we can shoot.
+            SmartDashboard.putNumber("fuel/smartRPS", 0);
+
           }
-        }).withName("Smart shoot");
+        }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 1) >= distanceFunction.getAsDouble()).andThen(run(
+          () -> {
+            double distance = distanceFunction.getAsDouble();
+            if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
+            double distanceRps = distanceToRPS.get(distance);
+            setIntakeVelocity(distanceRps);
+          } else {
+            setIntakeVelocity(0); // Not in between range we can shoot.
+        }})).withName("smart shoot");
   }
 
   public void stop() {
@@ -180,7 +192,7 @@ public class FuelSubsystem extends SubsystemBase {
       return Commands.run(
           () -> {
             stop();
-          }, this);
+          }, this).withName("stop");
     } else {
       return Commands.none();
     }
@@ -251,8 +263,13 @@ public class FuelSubsystem extends SubsystemBase {
     if (FuelConstants.k_isEnabled) {
       return run(() -> {
         setShooterVelocity(m_dashboardShooterRPS);
-        setIntakeVelocity(FuelConstants.kShootIntakeMotorSpeed);
-      });
+      }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 3) >= m_dashboardShooterRPS)
+      .andThen(
+        run(() -> {
+          setShooterVelocity(m_dashboardShooterRPS);
+          setIntakeVelocity(FuelConstants.kShootIntakeMotorSpeed);
+        })
+      );
     } else {
       return Commands.none();
     }
@@ -260,7 +277,15 @@ public class FuelSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_dashboardShooterRPS = SmartDashboard.getNumber("shooter/rps", 0);
-    SmartDashboard.putNumber("shooter/velocity", fuelShooterMotor.getEncoder().getVelocity());
+    m_dashboardShooterRPS = SmartDashboard.getNumber("shooter/RpsIn", 0);
+    SmartDashboard.putNumber("shooter/Rps", fuelShooterMotor.getEncoder().getVelocity());
+    if (this.getCurrentCommand() != null) {
+      if (this.getCurrentCommand() == this.getDefaultCommand()) {
+        SmartDashboard.putString("shooter/CurrentCommand", "Idle?");
+      } else {
+        String shooterCommandName = this.getCurrentCommand().getName();
+        SmartDashboard.putString("shooter/CurrentCommand", shooterCommandName);
+      }
+    }
   }
 }
