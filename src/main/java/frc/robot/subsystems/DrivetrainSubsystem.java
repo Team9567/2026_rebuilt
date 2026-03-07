@@ -241,11 +241,11 @@ public class DrivetrainSubsystem extends SubsystemBase {
     odometry.update(m_gyro.getRotation2d(), new DifferentialDriveWheelPositions(getLeftEncoder(), getRightEncoder()));
     if (DriveTrainConstants.kIsEnabled) {
       // updates position based on visible april tags
-      LimelightHelpers.SetRobotOrientation(DriveTrainConstants.kLimelightNetworkName,
-          odometry.getEstimatedPosition().getRotation().getDegrees(),
-          0, 0, 0, 0, 0);
-      LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
-          .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
+      // LimelightHelpers.SetRobotOrientation(DriveTrainConstants.kLimelightNetworkName,
+      //     odometry.getEstimatedPosition().getRotation().getDegrees(),
+      //     0, 0, 0, 0, 0);
+      // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
+      //     .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
 
       SmartDashboard.putNumber("drivetrain/degrees", odometry.getEstimatedPosition().getRotation().getDegrees());
       SmartDashboard.putNumber("drivetrain/gyroDegrees", m_gyro.getRotation2d().getDegrees());
@@ -258,9 +258,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
       if (Math.abs(m_gyro.getRate()) > 360) {
         doRejectUpdate = true;
       }
-      if (mt2.tagCount == 0) {
-        doRejectUpdate = true;
-      }
+      // if (mt2.tagCount == 0) {
+      //   doRejectUpdate = true;
+      // }
       if (!doRejectUpdate) {
         // odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
         // odometry.addVisionMeasurement(
