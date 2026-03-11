@@ -29,6 +29,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.FuelHerderSubsystem;
 import frc.robot.subsystems.FuelSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.DrivetrainSubsystem.StartingPosition;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -41,7 +42,8 @@ import frc.robot.subsystems.LEDSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem();
+    SendableChooser<StartingPosition> startingPosition = new SendableChooser<>();
+  private final DrivetrainSubsystem m_drivetrainSubsystem = new DrivetrainSubsystem(startingPosition);
   SlewRateLimiter linearRateLimiter = new SlewRateLimiter(1.5);
   SlewRateLimiter turnRateLimiter = new SlewRateLimiter(1.2);
 
@@ -49,6 +51,8 @@ public class RobotContainer {
   SendableChooser<Command> autochooser2 = new SendableChooser<>();
   SendableChooser<Handed> climbHandChooser = new SendableChooser<>();
   SendableChooser<Closeness> climbCloseChooser = new SendableChooser<>();
+
+
   private final FuelSubsystem m_fuelSubsystem = new FuelSubsystem();
   private final ClimberSubsystem m_climberSubsystem = new ClimberSubsystem();
   private final FuelHerderSubsystem m_fuelHerder = new FuelHerderSubsystem();
@@ -70,17 +74,26 @@ public class RobotContainer {
     climbHandChooser.addOption("right", Handed.Right);
     climbCloseChooser.addOption("near", Closeness.Near);
     climbCloseChooser.addOption("far", Closeness.Far);
-    autochooser1.addOption("Just Shoot", Autos.justShoot(m_fuelSubsystem));
+    autochooser1.setDefaultOption("Just Shoot", Autos.justShoot(m_fuelSubsystem));
     autochooser1.addOption("Smart Shoot", Autos.smartShoot(m_fuelSubsystem, m_drivetrainSubsystem));
     autochooser1.addOption("Smart Climb", Autos.smartClimb(m_climberSubsystem, m_drivetrainSubsystem,
         climbHandChooser.getSelected(), climbCloseChooser.getSelected()));
-    autochooser2.addOption("nothing", Commands.none());
+    autochooser1.addOption("Nothing", Commands.none());
+    autochooser2.setDefaultOption("Nothing", Commands.none());
     autochooser2.addOption("Smart Climb", Autos.smartClimb(m_climberSubsystem, m_drivetrainSubsystem,
         climbHandChooser.getSelected(), climbCloseChooser.getSelected()));
+
     SmartDashboard.putData("AutoChooser1", autochooser1);
     SmartDashboard.putData("AutoChooser2", autochooser2);
     SmartDashboard.putData("climb distance", climbCloseChooser);
     SmartDashboard.putData("climb handed", climbHandChooser);
+
+    startingPosition.addOption("left trench", StartingPosition.LeftTrench);
+    startingPosition.addOption("right trench", StartingPosition.RightTrench);
+    startingPosition.addOption("left bump", StartingPosition.LeftBump);
+    startingPosition.addOption("right bump", StartingPosition.RightBump);
+    startingPosition.addOption("hub", StartingPosition.Hub);
+    SmartDashboard.putData("starting position", startingPosition);
   }
 
   /**
@@ -157,10 +170,10 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return Commands.runOnce(() -> SmartDashboard.putString("Auto Stage", "before auto 1"))
-        .andThen(autochooser1.getSelected())
-        .andThen(() -> SmartDashboard.putString("Auto Stage", "after auto 1"))
-        .andThen(autochooser2.getSelected())
-        .andThen(() -> SmartDashboard.putString("Auto Stage", "after auto 2"));
+     // () -> SmartDashboard.putString("Auto Stage", "before auto 1")
+        return autochooser1.getSelected().withTimeout(10)
+        // .andThen(Commands.runOnce(() -> SmartDashboard.putString("Auto Stage", "after auto 1")))
+        .andThen(autochooser2.getSelected());
+        // .andThen(Commands.runOnce(() -> SmartDashboard.putString("Auto Stage", "after auto 2")));
   }
 }

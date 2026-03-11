@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DriveTrainConstants;
@@ -58,8 +59,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   Optional<Trigger> lowGearTrigger;
 
+  public enum StartingPosition {
+    LeftTrench, LeftBump, Hub, RightBump, RightTrench
+  }
+
   /** Creates a new ExampleSubsystem. */
-  public DrivetrainSubsystem() {
+  public DrivetrainSubsystem(SendableChooser<StartingPosition> startingPosition) {
     turnpid.setTolerance(1);
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
@@ -67,18 +72,50 @@ public class DrivetrainSubsystem extends SubsystemBase {
     while (m_gyro.isCalibrating()) {
       ;
     }
-    Rotation2d initialDirection = new Rotation2d(Math.PI);
+    Rotation2d initialDirection = new Rotation2d();
+    double initialX = 0;
+    double initialY = 0;
     var alliance = DriverStation.getAlliance();
     if (!alliance.isEmpty() && alliance.get() != Alliance.Blue) {
+      // red
       initialDirection = new Rotation2d(0);
+      initialX = 650.12 - (157.0 - 16.5);
+      initialY = 158.32;
+      if (startingPosition.getSelected() == StartingPosition.Hub) {
+        initialY += 0;
+      } else if (startingPosition.getSelected() == StartingPosition.LeftTrench){
+        initialY -= 133.47;
+      } else if (startingPosition.getSelected() == StartingPosition.RightTrench){
+        initialY += 133.47;
+      } else if (startingPosition.getSelected() == StartingPosition.LeftBump){
+        initialY -= (47+73)/2;
+      } else if (startingPosition.getSelected() == StartingPosition.RightBump){
+        initialY += (47+73)/2 ;
+      }
+    } else {
+      // blue
+      initialDirection = new Rotation2d(Math.PI);
+      initialX = 157.0 - 16.5;
+      initialY = 158.32;
+      if (startingPosition.getSelected() == StartingPosition.Hub) {
+        initialY += 0;
+      } else if (startingPosition.getSelected() == StartingPosition.LeftTrench){
+        initialY += 133.47;
+      } else if (startingPosition.getSelected() == StartingPosition.RightTrench){
+        initialY -= 133.47;
+      } else if (startingPosition.getSelected() == StartingPosition.LeftBump){
+        initialY += (47+73)/2;
+      } else if (startingPosition.getSelected() == StartingPosition.RightBump){
+        initialY -= (47+73)/2 ;
+      }
     }
     odometry = new DifferentialDrivePoseEstimator(
         kinematics,
         m_gyro.getRotation2d(),
         getLeftEncoder(),
         getRightEncoder(),
-        new Pose2d(0, 0, initialDirection));
-odometry.resetRotation(initialDirection);
+        new Pose2d(initialX, initialY, initialDirection));
+    odometry.resetRotation(initialDirection);
     SmartDashboard.putNumber("drivetrain/wheelconversion", DriveTrainConstants.kPositionConversionFactor);
 
     for (SparkFlex motor : new SparkFlex[] {
@@ -112,6 +149,7 @@ odometry.resetRotation(initialDirection);
     rightFrontMotor.configure(rightfrontConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     drivetrain = new DifferentialDrive(leftFrontMotor, rightFrontMotor);
+
   }
 
   public void setGearTrigger(Trigger t) {
@@ -163,7 +201,7 @@ odometry.resetRotation(initialDirection);
 
   public double getAngleToTarget(Pose2d target) {
     var pose = getEstimatedPosition();
-    var theta = Math.atan((target.getY() - pose.getY()) / (target.getX() - pose.getX()));
+    var theta = Math.atan2(target.getY() - pose.getY(), target.getX() - pose.getX());
     var degrees = theta * (Math.PI / 180);
     return degrees;
   }
@@ -203,11 +241,11 @@ odometry.resetRotation(initialDirection);
     odometry.update(m_gyro.getRotation2d(), new DifferentialDriveWheelPositions(getLeftEncoder(), getRightEncoder()));
     if (DriveTrainConstants.kIsEnabled) {
       // updates position based on visible april tags
-      LimelightHelpers.SetRobotOrientation(DriveTrainConstants.kLimelightNetworkName,
-          odometry.getEstimatedPosition().getRotation().getDegrees(),
-          0, 0, 0, 0, 0);
-      LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
-          .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
+      // LimelightHelpers.SetRobotOrientation(DriveTrainConstants.kLimelightNetworkName,
+      //     odometry.getEstimatedPosition().getRotation().getDegrees(),
+      //     0, 0, 0, 0, 0);
+      // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers
+      //     .getBotPoseEstimate_wpiBlue_MegaTag2(DriveTrainConstants.kLimelightNetworkName);
 
       SmartDashboard.putNumber("drivetrain/degrees", odometry.getEstimatedPosition().getRotation().getDegrees());
       SmartDashboard.putNumber("drivetrain/gyroDegrees", m_gyro.getRotation2d().getDegrees());
@@ -220,14 +258,14 @@ odometry.resetRotation(initialDirection);
       if (Math.abs(m_gyro.getRate()) > 360) {
         doRejectUpdate = true;
       }
-      if (mt2.tagCount == 0) {
-        doRejectUpdate = true;
-      }
+      // if (mt2.tagCount == 0) {
+      //   doRejectUpdate = true;
+      // }
       if (!doRejectUpdate) {
-        odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
-        odometry.addVisionMeasurement(
-            mt2.pose,
-            mt2.timestampSeconds);
+        // odometry.setVisionMeasurementStdDevs(VecBuilder.fill(.7, .7, 9999999));
+        // odometry.addVisionMeasurement(
+        //     mt2.pose,
+        //     mt2.timestampSeconds);
       }
     }
 

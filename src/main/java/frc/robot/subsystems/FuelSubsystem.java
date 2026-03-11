@@ -75,7 +75,7 @@ public class FuelSubsystem extends SubsystemBase {
           .d(FuelConstants.kShooterD)
 
               .maxMotion
-          .cruiseVelocity(0) //Why 0?
+          .cruiseVelocity(0) // Why 0?
           .maxAcceleration(FuelConstants.kMaxAcceleration)
           .allowedProfileError(FuelConstants.kProfileErrorRPS);
 
@@ -140,15 +140,18 @@ public class FuelSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("fuel/smartRPS", 0);
 
           }
-        }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 1) >= distanceFunction.getAsDouble()).andThen(run(
-          () -> {
-            double distance = distanceFunction.getAsDouble();
-            if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
-            double distanceRps = distanceToRPS.get(distance);
-            setIntakeVelocity(distanceRps);
-          } else {
-            setIntakeVelocity(0); // Not in between range we can shoot.
-        }})).withName("smart shoot");
+        }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 1) >= distanceToRPS
+            .get(distanceFunction.getAsDouble()))
+        .andThen(run(
+            () -> {
+              double distance = distanceFunction.getAsDouble();
+              if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
+                setIntakeVelocity(1.0); // max speed 
+              } else {
+                setIntakeVelocity(0); // Not in between range we can shoot.
+              }
+            }))
+        .withName("smart shoot");
   }
 
   public void stop() {
@@ -264,12 +267,11 @@ public class FuelSubsystem extends SubsystemBase {
       return run(() -> {
         setShooterVelocity(m_dashboardShooterRPS);
       }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 3) >= m_dashboardShooterRPS)
-      .andThen(
-        run(() -> {
-          setShooterVelocity(m_dashboardShooterRPS);
-          setIntakeVelocity(FuelConstants.kShootIntakeMotorSpeed);
-        })
-      );
+          .andThen(
+              run(() -> {
+                setShooterVelocity(m_dashboardShooterRPS);
+                setIntakeVelocity(FuelConstants.kShootIntakeMotorSpeed);
+              }));
     } else {
       return Commands.none();
     }

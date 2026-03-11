@@ -36,13 +36,14 @@ public final class Autos {
   }
 
   public static Command smartShoot(FuelSubsystem shooter, DrivetrainSubsystem drivetrain) {
-    return shooter.smartShoot(() -> {
-      return drivetrain.getDistanceToHub();
-    });
+    return drivetrain.turnCommand(drivetrain.getAngleToHub()).andThen(
+        shooter.smartShoot(() -> {
+          return drivetrain.getDistanceToHub();
+        })).withTimeout(10);
   }
 
   public static Command justShoot(FuelSubsystem shooter) {
-    return shooter.shootCommand();
+    return shooter.smartShoot(() -> 1.8).withTimeout(10); //shoot from 1.8 meters away for 10 seconds
   }
 
   public static Command smartClimb(ClimberSubsystem climber, DrivetrainSubsystem drivetrain, Handed handed,
