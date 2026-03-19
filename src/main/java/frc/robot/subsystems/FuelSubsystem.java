@@ -140,9 +140,7 @@ public class FuelSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("fuel/smartRPS", 0);
 
           }
-        }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 1) >= distanceToRPS
-            .get(distanceFunction.getAsDouble()))
-        .andThen(run(
+        }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 1) >= distanceToRPS.get(distanceFunction.getAsDouble()))        .andThen(run(
             () -> {
               double distance = distanceFunction.getAsDouble();
               if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
@@ -221,7 +219,7 @@ public class FuelSubsystem extends SubsystemBase {
    */
   public Command intakeCommand() {
     if (FuelConstants.k_isEnabled) {
-      return setCommand(FuelConstants.kIntakeShooterMotorSpeed, FuelConstants.kIntakeIntakeMotorSpeed);
+      return setCommand(FuelConstants.kIntakeShooterMotorSpeed, FuelConstants.kIntakeIntakeMotorSpeed/4);
     } else {
       return Commands.none();
     }
@@ -229,7 +227,7 @@ public class FuelSubsystem extends SubsystemBase {
 
   public Command ejectCommand() {
     if (FuelConstants.k_isEnabled) {
-      return setCommand(FuelConstants.kEjectShooterMotorSpeed, FuelConstants.kEjectIntakeMotorSpeed);
+      return setCommand(FuelConstants.kEjectShooterMotorSpeed, FuelConstants.kEjectIntakeMotorSpeed/2);
     } else {
       return Commands.none();
     }

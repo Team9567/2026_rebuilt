@@ -42,6 +42,14 @@ public final class Autos {
         })).withTimeout(10);
   }
 
+  public static Command centerAuto(ClimberSubsystem climber, DrivetrainSubsystem drivetrain, FuelSubsystem shooter) {
+    return drivetrain.driveCommand(1)
+      .andThen(shooter.smartShoot(() -> {
+        return drivetrain.getDistanceToHub();
+      })
+      ).withTimeout(8);
+  }
+
   public static Command justShoot(FuelSubsystem shooter) {
     return shooter.smartShoot(() -> 1.8).withTimeout(10); //shoot from 1.8 meters away for 10 seconds
   }
@@ -66,14 +74,14 @@ public final class Autos {
       approachAngle = Math.PI / 4;
     }
 
-    Pose2d currentPose2d = drivetrain.getEstimatedPosition();
-    Pose2d newPose2d = new Pose2d(currentPose2d.getTranslation(), new Rotation2d(approachAngle));
-    return climber.startClimbCommand()
-        .andThen(new DriveToPointCommand(newPose2d, drivetrain))
+    Pose2d approachPoint = new Pose2d(9567, 9567,new Rotation2d(approachAngle));
+    return Commands.parallel(climber.startClimbCommand(), new DriveToPointCommand(approachPoint, drivetrain))
         .andThen(drivetrain.driveCommand(Feet.of(-4.24).in(Meters)))
         .andThen(drivetrain.turnCommand(45))
         .andThen(drivetrain.driveCommand(slotDistance))
+        // .andThen(climber.moveUp());
         .andThen(climber.hangCommand());
+    
   }
 
   private Autos() {

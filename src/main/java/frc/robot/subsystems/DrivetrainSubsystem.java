@@ -49,6 +49,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
   DifferentialDrivePoseEstimator odometry;
   AHRS m_gyro;
   Field2d field = new Field2d();
+  SendableChooser<StartingPosition> m_startingPosition = null;
 
   double targetMeters = 0;
   double targetAngle = 0;
@@ -65,6 +66,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   /** Creates a new ExampleSubsystem. */
   public DrivetrainSubsystem(SendableChooser<StartingPosition> startingPosition) {
+    m_startingPosition = startingPosition;
     turnpid.setTolerance(1);
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
@@ -72,50 +74,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
     while (m_gyro.isCalibrating()) {
       ;
     }
-    Rotation2d initialDirection = new Rotation2d();
-    double initialX = 0;
-    double initialY = 0;
-    var alliance = DriverStation.getAlliance();
-    if (!alliance.isEmpty() && alliance.get() != Alliance.Blue) {
-      // red
-      initialDirection = new Rotation2d(0);
-      initialX = 650.12 - (157.0 - 16.5);
-      initialY = 158.32;
-      if (startingPosition.getSelected() == StartingPosition.Hub) {
-        initialY += 0;
-      } else if (startingPosition.getSelected() == StartingPosition.LeftTrench){
-        initialY -= 133.47;
-      } else if (startingPosition.getSelected() == StartingPosition.RightTrench){
-        initialY += 133.47;
-      } else if (startingPosition.getSelected() == StartingPosition.LeftBump){
-        initialY -= (47+73)/2;
-      } else if (startingPosition.getSelected() == StartingPosition.RightBump){
-        initialY += (47+73)/2 ;
-      }
-    } else {
-      // blue
-      initialDirection = new Rotation2d(Math.PI);
-      initialX = 157.0 - 16.5;
-      initialY = 158.32;
-      if (startingPosition.getSelected() == StartingPosition.Hub) {
-        initialY += 0;
-      } else if (startingPosition.getSelected() == StartingPosition.LeftTrench){
-        initialY += 133.47;
-      } else if (startingPosition.getSelected() == StartingPosition.RightTrench){
-        initialY -= 133.47;
-      } else if (startingPosition.getSelected() == StartingPosition.LeftBump){
-        initialY += (47+73)/2;
-      } else if (startingPosition.getSelected() == StartingPosition.RightBump){
-        initialY -= (47+73)/2 ;
-      }
-    }
+    
     odometry = new DifferentialDrivePoseEstimator(
         kinematics,
         m_gyro.getRotation2d(),
         getLeftEncoder(),
         getRightEncoder(),
-        new Pose2d(initialX, initialY, initialDirection));
-    odometry.resetRotation(initialDirection);
+        new Pose2d());
     SmartDashboard.putNumber("drivetrain/wheelconversion", DriveTrainConstants.kPositionConversionFactor);
 
     for (SparkFlex motor : new SparkFlex[] {
@@ -150,6 +115,48 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
     drivetrain = new DifferentialDrive(leftFrontMotor, rightFrontMotor);
 
+  }
+
+  public void initOdometry() {
+    Rotation2d initialDirection = new Rotation2d();
+    double initialX = 0;
+    double initialY = 0;
+
+    var alliance = DriverStation.getAlliance();
+    if (!alliance.isEmpty() && alliance.get() != Alliance.Blue) {
+      // red
+      initialDirection = new Rotation2d(0);
+      initialX = 650.12 - (157.0 - 16.5);
+      initialY = 158.32;
+      if (m_startingPosition.getSelected() == StartingPosition.Hub) {
+        initialY += 0;
+      } else if (m_startingPosition.getSelected() == StartingPosition.LeftTrench){
+        initialY -= 133.47;
+      } else if (m_startingPosition.getSelected() == StartingPosition.RightTrench){
+        initialY += 133.47;
+      } else if (m_startingPosition.getSelected() == StartingPosition.LeftBump){
+        initialY -= (47+73)/2;
+      } else if (m_startingPosition.getSelected() == StartingPosition.RightBump){
+        initialY += (47+73)/2 ;
+      }
+    } else {
+      // blue
+      initialDirection = new Rotation2d(Math.PI);
+      initialX = 157.0 - 16.5;
+      initialY = 158.32;
+      if (m_startingPosition.getSelected() == StartingPosition.Hub) {
+        initialY += 0;
+      } else if (m_startingPosition.getSelected() == StartingPosition.LeftTrench){
+        initialY += 133.47;
+      } else if (m_startingPosition.getSelected() == StartingPosition.RightTrench){
+        initialY -= 133.47;
+      } else if (m_startingPosition.getSelected() == StartingPosition.LeftBump){
+        initialY += (47+73)/2;
+      } else if (m_startingPosition.getSelected() == StartingPosition.RightBump){
+        initialY -= (47+73)/2 ;
+      }
+    }
+    odometry.resetPose(new Pose2d(initialX, initialY, initialDirection));
   }
 
   public void setGearTrigger(Trigger t) {

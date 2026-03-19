@@ -147,9 +147,9 @@ public class RobotContainer {
         .whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
 
     m_controllerController.button(OperatorConstants.kDriverControllerStart).onTrue(m_climberSubsystem.homeCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerY).onTrue(m_climberSubsystem.startClimbCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.moveUp());
-    m_controllerController.button(OperatorConstants.kDriverControllerA).whileTrue(m_climberSubsystem.moveDown());
+    m_controllerController.button(OperatorConstants.kDriverControllerY).whileTrue(m_climberSubsystem.moveUp());
+    m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.setPositionCommand(127));
+    m_controllerController.button(OperatorConstants.kDriverControllerA).onTrue(m_climberSubsystem.setPositionCommand(30));
 
     m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
     m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
@@ -175,5 +175,8 @@ public class RobotContainer {
         // .andThen(Commands.runOnce(() -> SmartDashboard.putString("Auto Stage", "after auto 1")))
         .andThen(autochooser2.getSelected());
         // .andThen(Commands.runOnce(() -> SmartDashboard.putString("Auto Stage", "after auto 2")));
+  }
+  public void initOdometryRc() {
+    m_drivetrainSubsystem.initOdometry();
   }
 }

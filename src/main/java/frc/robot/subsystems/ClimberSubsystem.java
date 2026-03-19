@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.FuelConstants;
 
 /**
  * Elevator subsystem using SparkMax with Vortex motor
@@ -34,8 +35,8 @@ public class ClimberSubsystem extends SubsystemBase {
   private final double kP = 0; // placeholder
   private final double kI = 0;
   private final double kD = 0;
-  private final double kS = 0;
-  private final double kV = 0;
+  private final double kS = 0.145;
+  private final double kV = 0.0021139;
   private final double kA = 0;
   private final double kG = 0;
   private final double maxVelocity = 1; // placeholder, meters per second
@@ -45,11 +46,12 @@ public class ClimberSubsystem extends SubsystemBase {
   private final int statorCurrentLimit = 40;
   private final boolean enableSupplyLimit = false;
   private final double supplyCurrentLimit = 40; // placeholder
+  private final double maxClimbHeightTicks = 127;
   private final double maxAllowedHeightMeters = Units.inchesToMeters(30);
   private final double maxClimbHeightMeters = Units.inchesToMeters(28.5); // How high the climber is at its peak (not
                                                                           // over limit)
   private final double minClimbHeightMeters = Units.inchesToMeters(24);
-  private final double kHomingAmpsThresh = 20;
+  private final double kHomingAmpsThresh = 13;
   private final double climberOffsetMeters = 0.15; // placeholder
 
   private double m_ampStorage[] = { 0, 0, 0, 0 };
@@ -91,14 +93,19 @@ public class ClimberSubsystem extends SubsystemBase {
       motorConfig.closedLoop.feedForward.kS(kS).kV(kV).kA(kA);
       motorConfig.closedLoop.feedForward.kG(kG);
 
+      motorConfig.closedLoop.maxMotion
+          .cruiseVelocity(1000)
+          .maxAcceleration(5000)
+          .allowedProfileError(2);
+
       // Configure Encoder Gear Ratio
-      motorConfig.encoder
-          .positionConversionFactor(1 / gearRatio)
-          .velocityConversionFactor((1 / gearRatio) / 60); // Covnert RPM to RPS
+      // motorConfig.encoder
+      //     .positionConversionFactor(1 / gearRatio)
+      //     .velocityConversionFactor((1 / gearRatio) / 60); // Covnert RPM to RPS
 
       motorConfig.softLimit
-          .forwardSoftLimitEnabled(true)
-          .forwardSoftLimit(maxAllowedHeightMeters - climberOffsetMeters)
+          .forwardSoftLimitEnabled(false)
+          .forwardSoftLimit(maxClimbHeightTicks)
           .reverseSoftLimitEnabled(false)
           .reverseSoftLimit(0);
       // Save configuration
@@ -122,7 +129,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public Command moveUp() {
     return run(() -> {
-      motor.set(0.25);
+      motor.set(0.35);
     });
   }
 
@@ -138,7 +145,10 @@ public class ClimberSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Climber/Encoder position", motor.getEncoder().getPosition());
+    SmartDashboard.putNumber("Climber set point", motor.getClosedLoopController().getSetpoint());
+    SmartDashboard.putBoolean("Climber is at setpoint", motor.getClosedLoopController().isAtSetpoint());
     SmartDashboard.putNumber("Climber Output Current", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Climber Voltage", getVoltage());
     SmartDashboard.putBoolean("Is Homed", this.m_isHomed);
 
     if (this.getCurrentCommand() != null) {
@@ -228,10 +238,10 @@ public class ClimberSubsystem extends SubsystemBase {
    * 
    * @param position The target position in meters
    */
-  public void setPosition(double position) {
-    if (m_isHomed) {
-      setPosition(position, 0);
-    }
+  public Command setPositionCommand(double position) {
+    return run(() -> {
+      setPosition(position);
+    });//.until(() -> motor.getClosedLoopController().isAtSetpoint()).withName("Set Position");
   }
 
   /**
@@ -240,13 +250,12 @@ public class ClimberSubsystem extends SubsystemBase {
    * @param position     The target position in meters
    * @param acceleration The acceleration in meters per second squared
    */
-  public void setPosition(double position, double acceleration) {
+  public void setPosition(double position) {
     if (kIsEnabled) {
       if (m_isHomed) {
         sparkPidController.setSetpoint(
             position,
-            ControlType.kMAXMotionPositionControl,
-            ClosedLoopSlot.kSlot0);
+            ControlType.kMAXMotionPositionControl);
       }
     }
   }
@@ -304,7 +313,10 @@ public class ClimberSubsystem extends SubsystemBase {
    * 
    * @param heightMeters The target height in meters
    * @return A command that moves the elevator to the specified height
+   *
    */
+
+
   public Command moveToHeightCommand(double heightMeters) {
     if (kIsEnabled) {
       if (m_isHomed) {
@@ -341,10 +353,10 @@ public class ClimberSubsystem extends SubsystemBase {
           config.softLimit.reverseSoftLimitEnabled(true);
           motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         } else {
-          motor.set(-0.15);
+          motor.set(-0.10);
         }
       }
-    }).withName("Home Command");
+    }).until(() -> m_isHomed).withName("Home Command");
   }
 
   public Command hangCommand() {
