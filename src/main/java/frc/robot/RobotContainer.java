@@ -74,7 +74,7 @@ public class RobotContainer {
     climbHandChooser.addOption("right", Handed.Right);
     climbCloseChooser.addOption("near", Closeness.Near);
     climbCloseChooser.addOption("far", Closeness.Far);
-    autochooser1.setDefaultOption("Just Shoot", Autos.justShoot(m_fuelSubsystem));
+    autochooser1.setDefaultOption("Center Auto", Autos.centerAuto(m_climberSubsystem, m_drivetrainSubsystem, m_fuelSubsystem));
     autochooser1.addOption("Smart Shoot", Autos.smartShoot(m_fuelSubsystem, m_drivetrainSubsystem));
     autochooser1.addOption("Smart Climb", Autos.smartClimb(m_climberSubsystem, m_drivetrainSubsystem,
         climbHandChooser.getSelected(), climbCloseChooser.getSelected()));
@@ -151,9 +151,10 @@ public class RobotContainer {
     m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.setPositionCommand(127));
     m_controllerController.button(OperatorConstants.kDriverControllerA).onTrue(m_climberSubsystem.setPositionCommand(30));
 
-    m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
-    m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
-
+    // m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
+    // m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
+    m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).onTrue(m_drivetrainSubsystem.turnCommand(90));
+    m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).onTrue(m_drivetrainSubsystem.turnCommand(-10));
     DoubleSupplier getGyroZValue = () -> {
       return m_drivetrainSubsystem.getGyroZValue();
     };

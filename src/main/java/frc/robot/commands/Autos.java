@@ -44,10 +44,11 @@ public final class Autos {
 
   public static Command centerAuto(ClimberSubsystem climber, DrivetrainSubsystem drivetrain, FuelSubsystem shooter) {
     return drivetrain.driveCommand(1)
+      .withTimeout(2)
       .andThen(shooter.smartShoot(() -> {
         return drivetrain.getDistanceToHub();
-      })
-      ).withTimeout(8);
+      }).withTimeout(6)
+      );
   }
 
   public static Command justShoot(FuelSubsystem shooter) {

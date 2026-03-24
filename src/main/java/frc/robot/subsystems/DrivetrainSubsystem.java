@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelPositions;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -67,7 +68,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
   /** Creates a new ExampleSubsystem. */
   public DrivetrainSubsystem(SendableChooser<StartingPosition> startingPosition) {
     m_startingPosition = startingPosition;
-    turnpid.setTolerance(1);
+    turnpid.setTolerance(2);
+    drivepid.setTolerance(0.02);
+
     m_gyro = new AHRS(DriveTrainConstants.kGyroPort);
     m_gyro.reset();
     m_gyro.zeroYaw();
@@ -156,7 +159,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         initialY -= (47+73)/2 ;
       }
     }
-    odometry.resetPose(new Pose2d(initialX, initialY, initialDirection));
+    odometry.resetPose(new Pose2d(Units.inchesToMeters(initialX), Units.inchesToMeters(initialY), initialDirection));
   }
 
   public void setGearTrigger(Trigger t) {
@@ -304,7 +307,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }, () -> {
       double avgPos = getAverageTicks();
       double speed = drivepid.calculate(avgPos, targetMeters);
-      speed = MathUtil.clamp(speed, -0.25, 0.25);
+      speed = MathUtil.clamp(speed, -0.5, 0.5);
       arcadeDriveRaw(speed, 0);
       SmartDashboard.putNumber("drivetrain/pid/position", avgPos);
     }).until(() -> {
@@ -320,10 +323,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
       turnpid.reset();
       SmartDashboard.putNumber("drivetrain/pid/targetAngle", targetAngle);
     }, () -> {
-      double rotation = -turnpid.calculate(m_gyro.getAngle(), angle);
-      rotation = MathUtil.clamp(rotation, -0.25, 0.25);
+      double rotation = -turnpid.calculate(m_gyro.getAngle(), targetAngle);
+      rotation = MathUtil.clamp(rotation, -0.50, 0.50);
       SmartDashboard.putNumber("drivetrain/pid/orientation", m_gyro.getAngle());
-      SmartDashboard.putNumber("drivetrain/pid/rotation", rotation);
+      SmartDashboard.putNumber("drivetrain/pid/output rotation", rotation);
       arcadeDriveRaw(0, rotation);
     }).until(() -> {
       return turnpid.atSetpoint();

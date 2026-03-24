@@ -64,12 +64,12 @@ public final class Constants {
         .in(Meters);
 
     public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;
-    public static final double kDriveP = 6.0;
+    public static final double kDriveP = 4.0;
     public static final double kDriveI = 0;
     public static final double kDriveD = 0;
-    public static final double kTurnP = 0.125;
+    public static final double kTurnP = 0.10;
     public static final double kTurnI = 0;
-    public static final double kTurnD = 0.005;
+    public static final double kTurnD = 0.01;
 
     public static final double kArmLength = Inches.of(10).in(Meters);
 
