@@ -47,11 +47,12 @@ public class ClimberSubsystem extends SubsystemBase {
   private final boolean enableSupplyLimit = false;
   private final double supplyCurrentLimit = 40; // placeholder
   private final double maxClimbHeightTicks = 127;
-  private final double maxAllowedHeightMeters = Units.inchesToMeters(30);
-  private final double maxClimbHeightMeters = Units.inchesToMeters(28.5); // How high the climber is at its peak (not
+ 
+  private final double maxHeightTicks = 99.5; // How high the climber is at its peak (not
                                                                           // over limit)
-  private final double minClimbHeightMeters = Units.inchesToMeters(24);
-  private final double kHomingAmpsThresh = 13;
+  private final double minHeightTicks = 0;
+  private final double hangHeightTicks = 30;
+  private final double kHomingAmpsThresh = 4; // Used to be 20 amps
   private final double climberOffsetMeters = 0.15; // placeholder
 
   private double m_ampStorage[] = { 0, 0, 0, 0 };
@@ -107,7 +108,7 @@ public class ClimberSubsystem extends SubsystemBase {
           .forwardSoftLimitEnabled(false)
           .forwardSoftLimit(maxClimbHeightTicks)
           .reverseSoftLimitEnabled(false)
-          .reverseSoftLimit(0);
+          .reverseSoftLimit(minHeightTicks);
       // Save configuration
       motor.configure(
           motorConfig,
@@ -182,7 +183,7 @@ public class ClimberSubsystem extends SubsystemBase {
       // Rotations
       return encoder.getPosition() / gearRatio;
     }
-    return -9567;
+    return 0;
   }
 
   /**
@@ -356,7 +357,7 @@ public class ClimberSubsystem extends SubsystemBase {
             config.softLimit.reverseSoftLimitEnabled(true);
             motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
           } else {
-            motor.set(-0.10);
+            motor.set(-0.05); //Used to be -0.15
           }
         }
       }
@@ -365,13 +366,13 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public Command hangCommand() {
     return run(() -> {
-      setPosition(minClimbHeightMeters);
+      setPosition(hangHeightTicks);
     }).withName("Hang Command");
   }
 
   public Command startClimbCommand() {
     return run(() -> {
-      setPosition(maxClimbHeightMeters);
+      setPosition(maxHeightTicks);
     }).withName("Start Climb Command");
   }
 
@@ -384,7 +385,7 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public Command unclimbCommand() {
     return run(() -> {
-      setPosition(maxClimbHeightMeters);
+      setPosition(maxHeightTicks);
     }).withName("Unclimb Command");
   }
 
