@@ -29,7 +29,7 @@ import frc.robot.Constants.FuelConstants;
 public class ClimberSubsystem extends SubsystemBase {
 
   // Constants
-  private static boolean kIsEnabled = true;
+  private static boolean kIsEnabled = false;
   private final int canID = 9; // placeholder
   private final double gearRatio = 56.0 / 45.0;
   private final double kP = 0; // placeholder
@@ -100,8 +100,8 @@ public class ClimberSubsystem extends SubsystemBase {
 
       // Configure Encoder Gear Ratio
       // motorConfig.encoder
-      //     .positionConversionFactor(1 / gearRatio)
-      //     .velocityConversionFactor((1 / gearRatio) / 60); // Covnert RPM to RPS
+      // .positionConversionFactor(1 / gearRatio)
+      // .velocityConversionFactor((1 / gearRatio) / 60); // Covnert RPM to RPS
 
       motorConfig.softLimit
           .forwardSoftLimitEnabled(false)
@@ -115,7 +115,7 @@ public class ClimberSubsystem extends SubsystemBase {
           PersistMode.kPersistParameters);
     }
 
-    setDefaultCommand(homeCommand()); //changed from stopCommand
+    setDefaultCommand(homeCommand()); // changed from stopCommand
   }
 
   public void setZSupplier(DoubleSupplier supplier) {
@@ -144,12 +144,14 @@ public class ClimberSubsystem extends SubsystemBase {
    */
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Climber/Encoder position", motor.getEncoder().getPosition());
-    SmartDashboard.putNumber("Climber/set point", motor.getClosedLoopController().getSetpoint());
-    SmartDashboard.putBoolean("Climber/is at setpoint", motor.getClosedLoopController().isAtSetpoint());
-    SmartDashboard.putNumber("Climber/Output Current", motor.getOutputCurrent());
-    SmartDashboard.putNumber("Climber/Voltage", getVoltage());
-    SmartDashboard.putBoolean("Climber/Is Homed (ON START NOT CURRENTLY)", this.m_isHomed);
+    if (kIsEnabled) {
+      SmartDashboard.putNumber("Climber/Encoder position", motor.getEncoder().getPosition());
+      SmartDashboard.putNumber("Climber/set point", motor.getClosedLoopController().getSetpoint());
+      SmartDashboard.putBoolean("Climber/is at setpoint", motor.getClosedLoopController().isAtSetpoint());
+      SmartDashboard.putNumber("Climber/Output Current", motor.getOutputCurrent());
+      SmartDashboard.putNumber("Climber/Voltage", getVoltage());
+      SmartDashboard.putBoolean("Climber/Is Homed (ON START NOT CURRENTLY)", this.m_isHomed);
+    }
 
     if (this.getCurrentCommand() != null) {
       if (this.getCurrentCommand() == this.getDefaultCommand()) {
@@ -241,7 +243,8 @@ public class ClimberSubsystem extends SubsystemBase {
   public Command setPositionCommand(double position) {
     return run(() -> {
       setPosition(position);
-    });//.until(() -> motor.getClosedLoopController().isAtSetpoint()).withName("Set Position");
+    });// .until(() -> motor.getClosedLoopController().isAtSetpoint()).withName("Set
+       // Position");
   }
 
   /**
@@ -316,7 +319,6 @@ public class ClimberSubsystem extends SubsystemBase {
    *
    */
 
-
   public Command moveToHeightCommand(double heightMeters) {
     if (kIsEnabled) {
       if (m_isHomed) {
@@ -342,18 +344,20 @@ public class ClimberSubsystem extends SubsystemBase {
 
   public Command homeCommand() {
     return run(() -> {
-      if (!m_isHomed) {
-        double currentAmps = motor.getOutputCurrent();
-        m_ampStorage[m_indexAmps++ % m_ampStorage.length] = currentAmps;
-        if (hasReachedHardstop()) {
-          setVoltage(0);
-          encoder.setPosition(0);
-          m_isHomed = true;
-          SparkMaxConfig config = new SparkMaxConfig();
-          config.softLimit.reverseSoftLimitEnabled(true);
-          motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        } else {
-          motor.set(-0.10);
+      if (kIsEnabled) {
+        if (!m_isHomed) {
+          double currentAmps = motor.getOutputCurrent();
+          m_ampStorage[m_indexAmps++ % m_ampStorage.length] = currentAmps;
+          if (hasReachedHardstop()) {
+            setVoltage(0);
+            encoder.setPosition(0);
+            m_isHomed = true;
+            SparkMaxConfig config = new SparkMaxConfig();
+            config.softLimit.reverseSoftLimitEnabled(true);
+            motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+          } else {
+            motor.set(-0.10);
+          }
         }
       }
     }).until(() -> m_isHomed).withName("Home Command");
