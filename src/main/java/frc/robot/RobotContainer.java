@@ -127,6 +127,7 @@ public class RobotContainer {
 
     Trigger lowGear = m_driverController.button(OperatorConstants.kDriverControllerY);
     lowGear.onTrue(new InstantCommand(m_ledSubsystem::setLowGear, m_ledSubsystem))
+
         .onFalse(new InstantCommand(m_ledSubsystem::setHighGear, m_ledSubsystem));
     m_drivetrainSubsystem.setGearTrigger(lowGear);
 
@@ -135,26 +136,25 @@ public class RobotContainer {
     // .whileTrue(m_fuelSubsystem.shootVelocityCommand(60)); // estimated distance
     // to score in hub:
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerRightTrigger, 0.90)
-        .whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(117).in(Meters)));
+        .whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(117).in(Meters))); //3 METERS
     m_controllerController.axisGreaterThan(OperatorConstants.kDriverControllerLeftTrigger, 0.80)
-        .whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(54).in(Meters)));
+        .whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(54).in(Meters))); //1.37 METERS
     m_controllerController.button(OperatorConstants.kDriverControllerLeftBumper)
         .whileTrue(m_fuelSubsystem.intakeCommand());
     m_controllerController.button(OperatorConstants.kDriverControllerRightBumper)
         .whileTrue(m_fuelSubsystem.ejectCommand());
 
-    m_controllerController.button(OperatorConstants.kDriverControllerX)
-        .whileTrue(m_fuelSubsystem.shootDashboardVelocityCommand());
 
     m_controllerController.button(OperatorConstants.kDriverControllerStart).onTrue(m_climberSubsystem.homeCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerY).whileTrue(m_climberSubsystem.moveUp());
-    m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.setPositionCommand(127));
-    m_controllerController.button(OperatorConstants.kDriverControllerA).onTrue(m_climberSubsystem.setPositionCommand(30));
+    m_controllerController.button(OperatorConstants.kDriverControllerY).whileTrue(m_climberSubsystem.setPositionCommand(128));
+    m_controllerController.button(OperatorConstants.kDriverControllerX).onTrue(m_climberSubsystem.setPositionCommand(30));
+    m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.stopCommand());
+    m_controllerController.button(OperatorConstants.kDriverControllerA).onTrue(m_climberSubsystem.setPositionCommand(3));
 
-    // m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
-    // m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
-    m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).onTrue(m_drivetrainSubsystem.turnCommand(90));
-    m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).onTrue(m_drivetrainSubsystem.turnCommand(-10));
+    m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
+    m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
+    // m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).onTrue(m_drivetrainSubsystem.turnCommand(90));
+    // m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).onTrue(m_drivetrainSubsystem.turnCommand(-10));
     DoubleSupplier getGyroZValue = () -> {
       return m_drivetrainSubsystem.getGyroZValue();
     };

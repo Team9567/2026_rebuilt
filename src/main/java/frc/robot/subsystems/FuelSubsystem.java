@@ -219,7 +219,7 @@ public class FuelSubsystem extends SubsystemBase {
    */
   public Command intakeCommand() {
     if (FuelConstants.k_isEnabled) {
-      return setCommand(FuelConstants.kIntakeShooterMotorSpeed, FuelConstants.kIntakeIntakeMotorSpeed/4);
+      return setCommand(FuelConstants.kIntakeShooterMotorSpeed, FuelConstants.kIntakeIntakeMotorSpeed / 4);
     } else {
       return Commands.none();
     }
@@ -227,7 +227,7 @@ public class FuelSubsystem extends SubsystemBase {
 
   public Command ejectCommand() {
     if (FuelConstants.k_isEnabled) {
-      return setCommand(FuelConstants.kEjectShooterMotorSpeed, FuelConstants.kEjectIntakeMotorSpeed/2);
+      return setCommand(FuelConstants.kEjectShooterMotorSpeed, FuelConstants.kEjectIntakeMotorSpeed/ 2);
     } else {
       return Commands.none();
     }

@@ -115,7 +115,7 @@ public class ClimberSubsystem extends SubsystemBase {
           PersistMode.kPersistParameters);
     }
 
-    setDefaultCommand(stopCommand());
+    setDefaultCommand(homeCommand()); //changed from stopCommand
   }
 
   public void setZSupplier(DoubleSupplier supplier) {
@@ -145,11 +145,11 @@ public class ClimberSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putNumber("Climber/Encoder position", motor.getEncoder().getPosition());
-    SmartDashboard.putNumber("Climber set point", motor.getClosedLoopController().getSetpoint());
-    SmartDashboard.putBoolean("Climber is at setpoint", motor.getClosedLoopController().isAtSetpoint());
-    SmartDashboard.putNumber("Climber Output Current", motor.getOutputCurrent());
-    SmartDashboard.putNumber("Climber Voltage", getVoltage());
-    SmartDashboard.putBoolean("Is Homed", this.m_isHomed);
+    SmartDashboard.putNumber("Climber/set point", motor.getClosedLoopController().getSetpoint());
+    SmartDashboard.putBoolean("Climber/is at setpoint", motor.getClosedLoopController().isAtSetpoint());
+    SmartDashboard.putNumber("Climber/Output Current", motor.getOutputCurrent());
+    SmartDashboard.putNumber("Climber/Voltage", getVoltage());
+    SmartDashboard.putBoolean("Climber/Is Homed (ON START NOT CURRENTLY)", this.m_isHomed);
 
     if (this.getCurrentCommand() != null) {
       if (this.getCurrentCommand() == this.getDefaultCommand()) {

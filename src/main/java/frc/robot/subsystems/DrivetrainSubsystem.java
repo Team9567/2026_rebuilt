@@ -314,7 +314,24 @@ public class DrivetrainSubsystem extends SubsystemBase {
       return drivepid.atSetpoint();
     });
   }
+  // public Command snapToAngle(double angleDegrees) {
+  //   return startRun(() -> {
+  //     turnpid.reset();
+  //   }, () -> {
+  //     double currentAngle = m_gyro.getAngle();
+  //     double rotationalOutput = turnpid.calculate(currentAngle, 0);
+  //     arcadeDrive(0, rotationalOutput);
+  //   }).until(() -> turnpid.atSetpoint());
+  // }
 
+  // public double getAvgRps() {
+  //   double s1 = leftBackMotor.getEncoder().getVelocity();
+  //   double s2 = leftFrontMotor.getEncoder().getVelocity();
+  //   double s3 = rightBackMotor.getEncoder().getVelocity();
+  //   double s4 = rightFrontMotor.getEncoder().getVelocity();
+
+  //   return s1 + s2 + s3 + s4 / 4;
+  // }
   public Command turnCommand(double angle) {
     return startRun(() -> {
       double curAngle = m_gyro.getAngle();
