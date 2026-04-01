@@ -148,17 +148,15 @@ public class RobotContainer {
     m_controllerController.button(OperatorConstants.kDriverControllerRightBumper)
         .whileTrue(m_fuelSubsystem.ejectCommand());
 
-    m_controllerController.button(OperatorConstants.kDriverControllerStart).onTrue(m_climberSubsystem.homeCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerY)
-        .whileTrue(m_climberSubsystem.setPositionCommand(128));
-    m_controllerController.button(OperatorConstants.kDriverControllerX)
-        .onTrue(m_climberSubsystem.setPositionCommand(30));
-    m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.stopCommand());
-    m_controllerController.button(OperatorConstants.kDriverControllerA)
-        .onTrue(m_climberSubsystem.setPositionCommand(3));
+    // m_controllerController.button(OperatorConstants.kDriverControllerStart).onTrue(m_climberSubsystem.homeCommand());
+    // m_controllerController.button(OperatorConstants.kDriverControllerY).whileTrue(m_climberSubsystem.setPositionCommand(128));
+    m_controllerController.button(OperatorConstants.kDriverControllerX).whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(155).in(Meters)));
+    // m_controllerController.button(OperatorConstants.kDriverControllerB).whileTrue(m_climberSubsystem.stopCommand());
+    // m_controllerController.button(OperatorConstants.kDriverControllerA).whileTrue(m_climberSubsystem.setPositionCommand(3));
 
     m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).whileTrue(m_fuelHerder.extendArms());
-    m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).whileTrue(m_fuelHerder.retractArms());
+     m_controllerController.pov(OperatorConstants.kDriverControllerLeftJoystickButton).whileTrue(m_fuelHerder.retractArms());
+    m_controllerController.pov(OperatorConstants.kDriverControllerLeftJoystickButton).whileTrue(m_fuelSubsystem.smartShoot(() -> Inches.of(155).in(Meters)));
     // m_controllerController.pov(OperatorConstants.kDriverControllerPOVUp).onTrue(m_drivetrainSubsystem.turnCommand(90));
     // m_controllerController.pov(OperatorConstants.kDriverControllerPOVDown).onTrue(m_drivetrainSubsystem.turnCommand(-10));
     DoubleSupplier getGyroZValue = () -> {

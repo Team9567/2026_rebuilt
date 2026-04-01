@@ -28,8 +28,8 @@ import frc.robot.Constants.FuelConstants;
 @Logged(name = "ClimberSubsystem")
 public class ClimberSubsystem extends SubsystemBase {
 
-  // Constants
-  private static boolean kIsEnabled = false;
+  // Constants 
+  private static boolean kIsEnabled = true;
   private final int canID = 9; // placeholder
   private final double gearRatio = 56.0 / 45.0;
   private final double kP = 0; // placeholder
