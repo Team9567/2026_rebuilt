@@ -64,12 +64,12 @@ public final class Constants {
         .in(Meters);
 
     public static final NavXComType kGyroPort = NavXComType.kMXP_SPI;
-    public static final double kDriveP = 6.0;
+    public static final double kDriveP = 4.0;
     public static final double kDriveI = 0;
     public static final double kDriveD = 0;
-    public static final double kTurnP = 0.125;
+    public static final double kTurnP = 0.10;
     public static final double kTurnI = 0;
-    public static final double kTurnD = 0.005;
+    public static final double kTurnD = 0.01;
 
     public static final double kArmLength = Inches.of(10).in(Meters);
 
@@ -129,10 +129,10 @@ public final class Constants {
     public static final double kShooterI = 0;
     public static final double kShooterD = kShooterP / 4;
 
-    public static final double kIntakeIntakeMotorSpeed = -1.0;
-    public static final double kIntakeShooterMotorSpeed = 0.30;
-    public static final double kEjectIntakeMotorSpeed = 1.0;
-    public static final double kEjectShooterMotorSpeed = -0.30;
+    public static final double kIntakeIntakeMotorSpeed = -0.60;
+    public static final double kIntakeShooterMotorSpeed = 0.40;
+    public static final double kEjectIntakeMotorSpeed = 0.60;
+    public static final double kEjectShooterMotorSpeed = -0.40;
     public static final double kSpinupIntakeMotorSpeed = 0;
     public static final double kSpinupShooterMotorSpeed = 0.50;
     public static final double kShootIntakeMotorSpeed = 1.0;

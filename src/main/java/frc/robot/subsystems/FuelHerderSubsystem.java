@@ -98,8 +98,8 @@ public class FuelHerderSubsystem extends SubsystemBase {
                 SmartDashboard.putNumber("FuelHerder/left target", leftTarget);
                 SmartDashboard.putNumber("FuelHerder/right target", rightTarget);
 
-                rightSpeed = MathUtil.clamp(rightSpeed, -0.50, 0.50);
-                leftSpeed = MathUtil.clamp(leftSpeed, -0.50, 0.50);
+                rightSpeed = MathUtil.clamp(rightSpeed, -0.75, 0.75);
+                leftSpeed = MathUtil.clamp(leftSpeed, -0.75, 0.75);
                 setLeft(leftSpeed);
                 setRight(rightSpeed);
             });

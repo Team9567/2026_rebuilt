@@ -41,7 +41,7 @@ public class FuelSubsystem extends SubsystemBase {
     distanceToRPS.put(Inches.of(54).in(Meters), 48.0); // 54 inches from hub at 48 RPS
     distanceToRPS.put(Inches.of(84).in(Meters), 52.0); // 84 inches from hub at 52 RPS
     distanceToRPS.put(Inches.of(117).in(Meters), 60.0); // 117 inches from hub at 60 RPS
-    distanceToRPS.put(Inches.of(179).in(Meters), 74.0); // 179 inches from hub at 74 RPS (Max)
+    distanceToRPS.put(Inches.of(179).in(Meters), 74.0); // 179 inches - 4.5 METERS from hub at 74 RPS (Max)
   }
 
   public FuelSubsystem() {
@@ -138,11 +138,8 @@ public class FuelSubsystem extends SubsystemBase {
           } else {
             setShooterVelocity(0); // Not in between range we can shoot.
             SmartDashboard.putNumber("fuel/smartRPS", 0);
-
           }
-        }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 1) >= distanceToRPS
-            .get(distanceFunction.getAsDouble()))
-        .andThen(run(
+        }).until(() -> (fuelShooterMotor.getEncoder().getVelocity() + 1) >= distanceToRPS.get(distanceFunction.getAsDouble()))        .andThen(run(
             () -> {
               double distance = distanceFunction.getAsDouble();
               if (distance < FuelConstants.kMaxDistanceFromHub && distance > FuelConstants.kMinDistanceFromHub) {
@@ -226,6 +223,8 @@ public class FuelSubsystem extends SubsystemBase {
       return Commands.none();
     }
   }
+
+
 
   public Command ejectCommand() {
     if (FuelConstants.k_isEnabled) {
